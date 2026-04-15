@@ -350,13 +350,13 @@ bool str_to_num1( string_view str, long *x)
 		return true;
 
 	//fprintf( stderr, "%s: %s %u\n", str, _(NOT_A_NUMBER), *x);
-	fprintf( stderr, "%.*s: %s ", size(str), &str[0], _(NOT_A_NUMBER));
+	fprintf( stderr, "%.*s: %s ", int(size(str)), &str[0], _(NOT_A_NUMBER));
 	fprint( stderr, *x);
 	fprintf( stderr, "\n");
 	return false;
 }
 
-bool str_to_num1( cchar ᚼ str, cchar ᚼ end, long *x)
+bool str_to_num1( cchar *str, cchar *end, long *x)
 {
 	int len = end - str;
 	long res = strto<long>( str, &end);
@@ -548,7 +548,7 @@ virtual	bool	load	( cchar ᚼ arg		)  ňŏ
 
 		if( max >= size(BUF) / 2)
 		{
-			fprintf( stderr, "%c%s: %s (> %u)!\n", opt, arg, _(TOO_MANY_SLOTS), size(BUF) / 2);
+			fprintf( stderr, "%c%s: %s (> %u)!\n", opt, arg, _(TOO_MANY_SLOTS), ui(size(BUF)) / 2);
 			exit( EXIT_FAILURE);
 		}
 
@@ -972,7 +972,7 @@ int find_n_print_schemes( void )
 	}
 
 	print_hr( hr_len );
-	if( found == 1)	printf( _(SCHEME_FOUND)		);
+	if( found == 1)	printf( "%s", _(SCHEME_FOUND)	);
 	else		printf( _(SCHEMES_FOUND), found	);
 
 	return found;

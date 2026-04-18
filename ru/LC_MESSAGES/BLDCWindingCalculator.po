@@ -1,0 +1,107 @@
+# Russian translations for BLDCWindingCalculator package.
+# Copyright (C) 2026 THE BLDCWindingCalculator'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the BLDCWindingCalculator package.
+# Automatically generated, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BLDCWindingCalculator 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-17 00:19+0000\n"
+"PO-Revision-Date: 2026-04-17 00:19+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: BLDCWindingCalculator.cpp:171 BLDCWindingCalculator.cpp:188
+#: BLDCWindingCalculator.cpp:201
+msgid "It's not a number. Used by default"
+msgstr "Это не число. Пусть будет"
+
+#: BLDCWindingCalculator.cpp:358
+#, c-format
+msgid "Number of %s must be divisible by %u!"
+msgstr "Число %s должно быть кратно %u!"
+
+#: BLDCWindingCalculator.cpp:373
+msgid "poles"
+msgstr "полюсов"
+
+#: BLDCWindingCalculator.cpp:373
+msgid "magnet poles"
+msgstr "магнитных полюсов ротора"
+
+#: BLDCWindingCalculator.cpp:386
+msgid "Too many slots"
+msgstr "Слишком много пазов"
+
+#: BLDCWindingCalculator.cpp:392
+msgid "slots"
+msgstr "пазов"
+
+#: BLDCWindingCalculator.cpp:392
+msgid "slots in the stator"
+msgstr "пазов (полюсов) статора"
+
+#: BLDCWindingCalculator.cpp:398
+msgid "cogging"
+msgstr "залипов"
+
+#: BLDCWindingCalculator.cpp:398
+msgid "cogging steps"
+msgstr "точек залипания"
+
+#: BLDCWindingCalculator.cpp:404
+msgid "ƒ/ν"
+msgstr "ƒ/ν"
+
+#: BLDCWindingCalculator.cpp:404
+msgid "reduction (ƒ/ν)"
+msgstr "магнитная редукция (ƒ/ν, Гц/сˉ¹) - отношение частот электрической/вращения"
+
+#: BLDCWindingCalculator.cpp:421
+msgid "config"
+msgstr "конфиг"
+
+#: BLDCWindingCalculator.cpp:421
+msgid "configuration"
+msgstr "конфигурация мотора"
+
+#: BLDCWindingCalculator.cpp:449 BLDCWindingCalculator.cpp:458
+msgid "slots per pole per phase"
+msgstr "базовое соотношение"
+
+#: BLDCWindingCalculator.cpp:449 BLDCWindingCalculator.cpp:458
+msgid "q"
+msgstr "q"
+
+#: BLDCWindingCalculator.cpp:526
+msgid "WF"
+msgstr "Kнамот"
+
+#: BLDCWindingCalculator.cpp:526
+msgid "winding factor"
+msgstr "коэффициент намотки"
+
+#: BLDCWindingCalculator.cpp:651
+msgid "winding scheme"
+msgstr "схема намотки"
+
+#: BLDCWindingCalculator.cpp:758 BLDCWindingCalculator.cpp:811
+#, c-format
+msgid "%u schemes found\n"
+msgstr "Найдено %u схем\n"
+
+#: BLDCWindingCalculator.cpp:810
+msgid "1 scheme found\n"
+msgstr "Найдена 1 схема\n"
+
+#: BLDCWindingCalculator.cpp:961 BLDCWindingCalculator.cpp:968
+#: BLDCWindingCalculator.cpp:974
+msgid "Wrong parameter"
+msgstr "Неверный параметр"

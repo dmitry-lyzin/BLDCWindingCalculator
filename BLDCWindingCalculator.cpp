@@ -1,4 +1,4 @@
-﻿#define _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
 #define STATIC_TESTS 1
 #define STATIC_ASSERT(exp) static_assert( exp, #exp " FAIL!" );
 #define ˂ template< class
@@ -23,14 +23,14 @@
 #define STATIC constexpr static
 #define _₠čv̆šňŏŭř˂˃ᚼ
 
-#define _(x) STR[x][LANG]
+#define _(str) gettext((str))
 
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <inttypes.h>
 #include <complex>
-//#include <libintl.h>
+#include <libintl.h>
 
 using ui	= unsigned int;
 using angle	= unsigned long long;
@@ -38,179 +38,6 @@ using cchar	= const char;
 using std::swap;
 using std::size; //#define size(x) (sizeof (x) / sizeof *(x))
 using std::string_view;
-
-enum { EN, DE, RU, MAX_LANG };
-
-enum
-{	SLOTS
-,	POLES
-,	LCM
-,	REDUCT
-,	Q
-,	WF
-,	CONFIG
-,	SXEMA
-,	SCHEMES_FOUND
-,	SCHEME_FOUND
-,	UNBALANCED
-,	TOO_MANY_SLOTS
-,	NUMBER_OF_SLOTS_DIV_3
-,	NUMBER_OF_POLES_DIV_2
-,	NUMBER_OF_X_DIV_Y
-,	ERROR_PARAM
-,	ERROR_OPT
-,	ERROR_OPT_ARG
-,	NOT_A_NUMBER
-,	SLOTS_LONG
-,	MAGNET_POLES
-,	REDUCTION
-,	least_common_multiple
-,	Q_LONG
-,	WF_LONG
-,	CONFIGURATION
-,	PRINT_THIS_TEXT
-,	USAGE
-,	MAX_MESS
-};
-
-bool	CONSOLE	= false;
-cchar*	EXENAME	= "";
-ui	LANG	= EN;
-char	BUF[1024];
-cchar*	STR[MAX_MESS][MAX_LANG] =
-{ {	"slots"
-  ,	"slots"
-  ,	"пазов"
-  }
-, {	"poles"
-  ,	"poles"
-  ,	"полюсов"
-  }
-, {	"LCM"//"cogging"//"equil" // unstable point; instability
-  ,	"kgV"//"gleich" // instabil
-  ,	"НОК"//"залип" // точек равновесия // равн.т // нестабильный неустойчивость
-  }
-, {	"ƒ/ν"
-  ,	"ƒ/ν"
-  ,	"ƒ/ν"
-  }
-, {	"q"
-  ,	"q"
-  ,	"q"
-  }
-, {	"WF"
-  ,	"WF"
-  ,	"Kмотки"
-  }
-, {	"config"
-  ,	"config"
-  ,	"конфиг"
-  }
-, {	"winding scheme"
-  ,	"wicklungsschema"
-  ,	"схема намотки"
-  }
-, {	"%u schemes found\n"
-  ,	"%u Schemata gefunden\n"
-  ,	"Найдено %u схем\n"
-  }
-, {	"1 scheme found\n"
-  ,	"1 Schemata gefunden\n"
-  ,	"Найдена 1 схема\n"
-  }
-, {	"Unbalanced"
-  ,	"Unausgewogen"
-  ,	"Несбалансирована"
-  }
-, {	"Too many slots"
-  ,	"Zu viele nutanzahl"
-  ,	"Слишком много пазов"
-  }
-, {	"Number of slots must be divisible by 3!"
-  ,	"Nutanzahl muss durch 3 teilbar sein!"
-  ,	"Число пазов должно быть кратно 3!"
-  }
-, {	"Number of magnet poles must be divisible by 2!"
-  ,	"Polanzahl muss gerade sein!"
-  ,	"Число магнитных полюсов должно быть четным!"
-  }
-, {	"Number of %s must be divisible by %u!"
-  ,	"Number of %s must be divisible by %u!"
-  ,	"Число %s должно быть кратно %u!"
-  }
-, {	"Error parameter"
-  ,	"Error parameter"
-  ,	"Неверный параметр"
-  }
-, {	"Unknown option"
-  ,	"Unknown option"
-  ,	"Неверная опция"
-  }
-, {	"Option requires an argument"
-  ,	"Option requires an argument"
-  ,	"Опции нужен параметр"
-  }
-, {	"It's not a number. Used by default"
-  ,	"Das ist keine Zahl. Standard ist"
-  ,	"Это не число. Пусть будет"
-  }
-, {	"slots in the stator"
-  ,	"nuten im Stator"
-  ,	"пазов (полюсов) статора"
-  }
-, {	"magnet poles"
-  ,	"magnetpole"
-  ,	"магнитных полюсов ротора"
-  }
-, {	"reduction (ƒ/ν)"
-  ,	"ƒ/ν"
-  ,	"магнитная редукция (ƒ/ν, Гц/сˉ¹) - отношение частот электрической/вращения"
-  }
-, {	"least common multiple"//"cogging steps" // "equilibrium points" // unstable point; instability
-  ,	"kleinstes gemeinsames Vielfaches"//"gleichgewichtspunkte" // instabil
-  ,	"наименьшее общее кратное"//"точек залипания" // "точек равновесия" // "равновесных точек" // нестабильный неустойчивость
-  }
-, {	"slots per pole per phase"
-  ,	"slots per pole per phase"
-  ,	"базовое соотношение"
-  }
-, {	"winding factor"
-  ,	"Wickelfaktor"
-  ,	"коэффициент намотки"
-  }
-, {	"configuration"
-  ,	"configuration"
-  ,	"конфигурация мотора"
-  }
-, {	"print this text"
-  ,	"diesen Text drucken"
-  ,	"напечатать этот текст"
-  }
-, { 	"Usage:  %s [-h] [file]\n"
-	"\n"
-	"Parameters:\n"
-	"	file		Print text file\n"
-	"	-h		Print %s usage\n"
-	"\n"
-	"example:\n"
-
-  ,	"Usage:  %s [-h] [file]\n"
-	"\n"
-	"Parameters:\n"
-	"	file		Print text file\n"
-	"	-h		Print %s usage\n"
-	"\n"
-	"example:\n"
-
-  ,	"Использование:  %s [-h] число\n"
-	"\n"
-	"Параметры:\n"
-	"	-h		Print %s usage\n"
-	"	file		Print text file\n"
-	"\n"
-	"пример:\n"
-  }
-};
 
 #ifdef __unix__
 #	include <unistd.h>
@@ -226,22 +53,10 @@ cchar*	STR[MAX_MESS][MAX_LANG] =
 HANDLE hConsole = nullptr;
 CONSOLE_SCREEN_BUFFER_INFO console_screen_buffer_info;
 
-// to extract filename from path
-char *basename( char *path) noexcept
-{
-	size_t len = strlen( path );
-	path += len;
-	while( len --> 0 )
-	{
-		if( *--path == '\\' )
-		{
-			path++;
-			return path;
-		}
-	}
-	return path;
-}
 #endif
+
+bool	stdout_is_console = false;
+char	BUF[1024];
 
 ₠ inline int fast_toupper( int c) noexcept { return c & ~('a' ^ 'A'); }
 // pow10(n) = 10ⁿ
@@ -332,8 +147,8 @@ int fprint( FILE *stream, double	x ) { return fprintf( stream, "%g",	x ); }
 		return true;
 	}
 
-	//fprintf( stderr, "%s: %s %u\n", str, _(NOT_A_NUMBER), *x);
-	fprintf( stderr, "%s: %s ", str, _(NOT_A_NUMBER));
+	//fprintf( stderr, "%s: %s %u\n", str, _("It's not a number. Used by default"), *x);
+	fprintf( stderr, "%s: %s ", str, _("It's not a number. Used by default"));
 	fprint( stderr, *x);
 	fprintf( stderr, "\n");
 	return false;
@@ -349,8 +164,8 @@ bool str_to_num1( string_view str, long *x)
 	if( end - &str[0] == size(str) )
 		return true;
 
-	//fprintf( stderr, "%s: %s %u\n", str, _(NOT_A_NUMBER), *x);
-	fprintf( stderr, "%.*s: %s ", int(size(str)), &str[0], _(NOT_A_NUMBER));
+	//fprintf( stderr, "%s: %s %u\n", str, _("It's not a number. Used by default"), *x);
+	fprintf( stderr, "%.*s: %s ", int(size(str)), &str[0], _("It's not a number. Used by default"));
 	fprint( stderr, *x);
 	fprintf( stderr, "\n");
 	return false;
@@ -363,7 +178,7 @@ bool str_to_num1( cchar *str, cchar *end, long *x)
 
 	if( end == nullptr || (end - str < len) )
 	{
-		fprintf( stderr, "%.*s: %s ", len, str, _(NOT_A_NUMBER));
+		fprintf( stderr, "%.*s: %s ", len, str, _("It's not a number. Used by default"));
 		fprint( stderr, *x);
 		fprintf( stderr, "\n");
 		return false;
@@ -470,8 +285,8 @@ struct Param
 {
 	bool	column;
 	char	opt;
-	ui	shortname;
-	ui	longname;
+	cchar*	shortname;
+	cchar*	longname;
 
 virtual	void	usage_s	( void			) čň	= 0;
 virtual	void	usage_l	( void			) čň	= 0;
@@ -479,7 +294,7 @@ virtual	ui	calc	( ui slots, ui poles	) čň	= 0;
 virtual	void	print	( ui val		) čň	= 0;
 virtual	bool	load	( cchar ᚼ arg		)	= 0;
 
-₠	Param		( char _opt, ui _shortname, ui _longname)
+₠	Param		( char _opt, cchar *_shortname, cchar *_longname)
 	: column(false), opt(_opt), shortname(_shortname), longname(_longname) {}
 };
 
@@ -506,7 +321,7 @@ virtual	bool	load	( cchar ᚼ arg	)  ňŏ
 		return false;
 	}
 
-₠	Param_range	( char opt, ui shortname, ui longname, ui _min, ui _max)
+₠	Param_range	( char opt, cchar *shortname, cchar *longname, ui _min, ui _max)
 	: Param( opt, shortname, longname), min(_min), max(_max) {}
 };
 
@@ -520,22 +335,22 @@ virtual	bool	load	( cchar ᚼ arg	) ň
 		if( step && ( ! min || min % step) )
 		{
 			fprintf( stderr, "%c%s: ", opt, arg);
-			fprintf( stderr, _(NUMBER_OF_X_DIV_Y), _(longname), step );
+			fprintf( stderr, _("Number of %s must be divisible by %u!"), _(longname), step );
 			fprintf( stderr, "\n");
 			return false;
 			//exit( EXIT_FAILURE);
 		}
 
 		return true;
-	}	
-₠	Param_range_step( char opt, ui shortname, ui longname, ui min, ui max, ui _step)
+	}
+₠	Param_range_step( char opt, cchar *shortname, cchar *longname, ui min, ui max, ui _step)
 	: Param_range( opt, shortname, longname, min, max), step(_step) {}
 };
 
 struct Param_poles		final: Param_range_step
 {
 virtual	ui	calc	( ui slots, ui poles	) čňŏ	{ return poles; }
-₠	Param_poles	( void			): Param_range_step( 'p', POLES, MAGNET_POLES, 2, 100, 2) {}
+₠	Param_poles	( void			): Param_range_step( 'p', "poles", "magnet poles", 2, 100, 2) {}
 } par_poles;
 
 struct Param_slots		final: Param_range_step
@@ -548,25 +363,25 @@ virtual	bool	load	( cchar ᚼ arg		)  ňŏ
 
 		if( max >= size(BUF) / 2)
 		{
-			fprintf( stderr, "%c%s: %s (> %u)!\n", opt, arg, _(TOO_MANY_SLOTS), ui(size(BUF)) / 2);
+			fprintf( stderr, "%c%s: %s (> %u)!\n", opt, arg, _("Too many slots"), ui(size(BUF)) / 2);
 			exit( EXIT_FAILURE);
 		}
 
 		return true;
-	}	
-₠	Param_slots	( void			)	: Param_range_step( 's', SLOTS, SLOTS_LONG, 3, 99, 3) {}
+	}
+₠	Param_slots	( void			)	: Param_range_step( 's', "slots", "slots in the stator", 3, 99, 3) {}
 } par_slots;
 
 struct Param_NOK		final: Param_range
 {
 virtual	ui	calc	( ui slots, ui poles	) čňŏ	{ return minmax( NOK( slots, poles));	}
-₠	Param_NOK	( void			)	: Param_range( 'l', LCM, least_common_multiple, 0, -1) {}
+₠	Param_NOK	( void			)	: Param_range( 'c', "cogging", "cogging steps", 0, -1) {}
 } par_NOK;
 
 struct Param_reduction		final: Param_range
 {
 virtual	ui	calc	( ui slots, ui poles	) čňŏ	{ return minmax( NOK( slots, poles)/6);	}
-₠	Param_reduction	( void			)	: Param_range( 'r', REDUCT, REDUCTION, 0, -1) {}
+₠	Param_reduction	( void			)	: Param_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0, -1) {}
 } par_reduct;
 
 struct Print_config: Param
@@ -580,10 +395,10 @@ virtual	void	usage_s	( void			) čňŏ	{						}
 virtual	void	usage_l	( void			) čňŏ	{						}
 virtual	ui	calc	( ui slots, ui poles	) čňŏ	{ return pack( slots, poles);			}
 virtual	void	print	( ui val		) čňŏ	{ printf( "%u/%u\t", slots(val), poles(val) );	}
-virtual	bool	load	( cchar ᚼ arg		)  ňŏ	{ return false;					}	
+virtual	bool	load	( cchar ᚼ arg		)  ňŏ	{ return false;					}
 
-₠	Print_config	( char opt, ui shortname, ui longname): Param( opt, shortname, longname) {}
-₠	Print_config	( void			)	: Param( 0, CONFIG, CONFIGURATION) {}
+₠	Print_config	( char opt, cchar *shortname, cchar *longname): Param( opt, shortname, longname) {}
+₠	Print_config	( void			)	: Param( 0, "config", "configuration") {}
 } print_config;
 
 struct Param_q			final: Print_config
@@ -611,7 +426,7 @@ virtual	bool	load	( cchar ᚼ arg		)  ňŏ
 
 		if( !multiplier || !denominator )
 		{
-			fprintf( stderr, "%c%s: %s %s = 0?\n", opt, arg, _(Q_LONG), _(Q));
+			fprintf( stderr, "%c%s: %s %s = 0?\n", opt, arg, _(longname), _(shortname));
 			exit( EXIT_FAILURE);
 		}
 
@@ -620,11 +435,11 @@ virtual	bool	load	( cchar ᚼ arg		)  ňŏ
 		return true;
 	}
 
-₠	Param_q		( void			)	: Print_config( 'q', Q, Q_LONG), sample(0) {}
+₠	Param_q		( void			)	: Print_config( 'q', "q", "slots per pole per phase"), sample(0) {}
 } par_q;
 
 struct Param_winding_factor	final: Param_range
-{	
+{
 STATIC	ui	nuls	= 6;
 STATIC	ui	scale	= pow10( nuls);
 STATIC	ui	toscale	( double x		)	{ return ui((x + .5/scale) * scale); }
@@ -676,7 +491,7 @@ virtual	bool	load	( cchar ᚼ arg		)  ňŏ
 		{
 		case 0:	return false;
 		case 1:	max = min;
-		case 2:	
+		case 2:
 			if( d_min > 1. ||  d_max > 1. )
 			{
 				fprintf( stderr, "%c%s: %s > 1 ?\n", opt, arg, _(longname) );
@@ -688,7 +503,7 @@ virtual	bool	load	( cchar ᚼ arg		)  ňŏ
 		return false;
 	}
 
-₠	Param_winding_factor( void		)	: Param_range( 'w', WF, WF_LONG, 0, scale) {}
+₠	Param_winding_factor( void		)	: Param_range( 'w', "WF", "winding factor", 0, scale) {}
 } par_winding_factor;
 
 struct Print_sxema		final: Print_config
@@ -777,7 +592,7 @@ virtual	void	print	( ui val		) čňŏ
 					*p ^= ('B' ^ 'C');
 		}
 
-		if( ! CONSOLE )
+		if( ! stdout_is_console )
 		{
 			printf("%.*s\t", slots, sxema);
 			return;
@@ -787,7 +602,7 @@ virtual	void	print	( ui val		) čňŏ
 		for( ui i = 0; i < slots; sxema++, i++ )
 		{
 			// ANSI escape color codes
-			static cchar *color_codes[3] = 
+			static cchar *color_codes[3] =
 			{ "96" // Bright Cyan //"94" // Bright Blue
 			, "92" // Bright Green
 			, "93" // Bright Yellow
@@ -800,7 +615,7 @@ virtual	void	print	( ui val		) čňŏ
 #else
 		for( ui i = 0; i < slots; sxema++, i++ )
 		{
-			static WORD attributes[3] = 
+			static WORD attributes[3] =
 			{ FOREGROUND_INTENSITY | FOREGROUND_BLUE | FOREGROUND_GREEN
 			, FOREGROUND_INTENSITY | FOREGROUND_GREEN
 			, FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED
@@ -813,7 +628,7 @@ virtual	void	print	( ui val		) čňŏ
 		SetConsoleTextAttribute( hConsole, console_screen_buffer_info.wAttributes);
 #endif
 	}
-₠	Print_sxema	( void			)	: Print_config( 0, SXEMA, SXEMA) {}
+₠	Print_sxema	( void			)	: Print_config( 0, "winding scheme", "winding scheme") {}
 } print_sxema;
 #if STATIC_TESTS
 STATIC_ASSERT( Print_sxema::test2( 24, 18) );
@@ -838,7 +653,7 @@ Param *PARAMS[] = // все параметры
 
 /*int tab_XpXs( void )
 {
-	printf(	"%s->", _(SLOTS) );
+	printf(	"%s->", _("slots") );
 	for( ui slots = slots_min; slots <= slots_max; slots += 3)
 		printf(	"\t%u", slots );
 	printf(	"\n");
@@ -920,7 +735,7 @@ int find_n_print_schemes( void )
 
 	if( found == 0 )
 	{
-		printf(_(SCHEMES_FOUND), 0);
+		printf(_("%u schemes found\n"), 0);
 		return 0;
 	}
 
@@ -940,7 +755,7 @@ int find_n_print_schemes( void )
 			printf( "%s\t", _(PARAMS[i]->shortname));
 	}
 	printf( "\n");
-	ui hr_len = PARAMS[SLOTS]->column ? slots_max : first_val[SLOTS];
+	ui hr_len = PARAMS[0]->column ? slots_max : first_val[0];
 	for( ui i = 0; i < size(PARAMS)-1; i++)
 	{
 		if( PARAMS[i]->column )
@@ -972,8 +787,8 @@ int find_n_print_schemes( void )
 	}
 
 	print_hr( hr_len );
-	if( found == 1)	printf( "%s", _(SCHEME_FOUND)	);
-	else		printf( _(SCHEMES_FOUND), found	);
+	if( found == 1)	printf( "%s", _("1 scheme found\n")	);
+	else		printf( _("%u schemes found\n"), found	);
 
 	return found;
 }
@@ -1013,15 +828,24 @@ bool print_1_scheme( ui slots, ui poles )
 	print_sxema( BUF, slots);
 	for( ui i = 0; i < slots; i++)
 		printf( "─" );
-	printf( "\n%s\n", _(UNBALANCED));
+	printf( "\n%s\n", _("Unbalanced"));
 	return false;
 }
 */
 
 int usage( void)
 {
+	const char *USAGE =
+	"Usage:  %s [-h] [file]\n"
+	"\n"
+	"Parameters:\n"
+	"	file		Print text file\n"
+	"	-h		Print %s usage\n"
+	"\n"
+	"example:\n";
+
 	printf(	"\nПрограмма для расчета схем намотки многополюсных электромоторов (BLDC и т.д.)\n\n"
-		"Использование: %s [-h]", EXENAME);
+		"Использование: %s [-h]", APPNAME);
 	for( ui i = 0; i < size(PARAMS); i++)
 		PARAMS[i]->usage_s();
 	printf(	"\n\nопции:\n"
@@ -1042,7 +866,7 @@ bool optproc( int opt, cchar ᚼ arg )
 {
 	//printf("!!! %c, \"%s\"\n", opt, arg);
 	if( opt == 'h')
-		exit( usage() ); 
+		exit( usage() );
 
 	for( ui i = 0; i < size(PARAMS); i++)
 	{
@@ -1062,15 +886,19 @@ bool optproc( int opt, cchar ᚼ arg )
 //int main( int argc, cchar* argv[] )
 int main( int argc, char *const *argv )
 {
-	CONSOLE	= isatty( STDOUT_FILENO);
-	EXENAME	= basename( (char *)argv[0]);
+	stdout_is_console = isatty( STDOUT_FILENO);
 
 #ifdef __unix__
-	enum
-	{ LANG_ENGLISH	= hash("en")
-	, LANG_GERMAN	= hash("de")
-	, LANG_RUSSIAN	= hash("ru")
-	};
+	//enum
+	//{ LANG_ENGLISH  = hash("en")
+	//, LANG_GERMAN   = hash("de")
+	//, LANG_RUSSIAN  = hash("ru")
+	//};
+
+	if( ! setlocale			(LC_MESSAGES, "")) perror(getenv("LANG")); // может LC_ALL ? Нет, десятичная запятая - зло!
+	if( ! bindtextdomain		(APPNAME, "."	)) perror("."		);
+	if( ! bind_textdomain_codeset	(APPNAME,"UTF-8")) perror("UTF-8"	);
+	if( ! textdomain		(APPNAME	)) perror(APPNAME	);
 
 	auto primarylangid = hash( getenv("LANG") );
 	//setlocale( LC_CTYPE, ".UTF8");
@@ -1083,7 +911,7 @@ int main( int argc, char *const *argv )
 		freopen("CON", "w", stderr);
 	//freopen("CON", "r", stdin);
 
-	if( CONSOLE )
+	if( stdout_is_console )
 	{
 		hConsole = GetStdHandle( STD_OUTPUT_HANDLE);
 		GetConsoleScreenBufferInfo( hConsole, &console_screen_buffer_info );
@@ -1091,13 +919,15 @@ int main( int argc, char *const *argv )
 	}
 #endif
 
-	switch( primarylangid )
-	{
-	case LANG_ENGLISH	: LANG = EN; break;
-	case LANG_GERMAN	: LANG = DE; break;
-	case LANG_RUSSIAN	: LANG = RU; break;
-	default			: LANG = EN; break;
-	}
+	//enum { EN, DE, RU, MAX_LANG };
+	//ui	LANG	= EN;
+	//switch( primarylangid )
+	//{
+	//case LANG_ENGLISH	: LANG = EN; break;
+	//case LANG_GERMAN	: LANG = DE; break;
+	//case LANG_RUSSIAN	: LANG = RU; break;
+	//default			: LANG = EN; break;
+	//}
 
 	if( 1 == argc )
 		return usage();
@@ -1115,20 +945,20 @@ int main( int argc, char *const *argv )
 		if( arg[1] )
 		{
 			if( !optproc( arg[0], &arg[1]) )
-				fprintf( stderr, "%s: %s\n", arg, _(ERROR_PARAM));
+				fprintf( stderr, "%s: %s\n", arg, _("Wrong parameter"));
 			continue;
 		}
 
 		if( i+1 >= argc )
 		{
 			if( !optproc( arg[0], "") )
-				fprintf( stderr, "%s: %s\n", arg, _(ERROR_PARAM));
+				fprintf( stderr, "%s: %s\n", arg, _("Wrong parameter"));
 			continue;
 		}
 		else
 		{
 			if( !optproc( arg[0], argv[i+1]) )
-				fprintf( stderr, "%c: %s\n", arg[0], _(ERROR_PARAM));
+				fprintf( stderr, "%c: %s\n", arg[0], _("Wrong parameter"));
 			else
 				i++;
 			continue;

@@ -23,14 +23,11 @@
 #define STATIC constexpr static
 #define _₠čv̆šňŏŭř˂˃ᚼ
 
-#define _(str) gettext((str))
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <inttypes.h>
 #include <complex>
-#include <libintl.h>
 
 using ui	= unsigned int;
 using angle	= unsigned long long;
@@ -42,7 +39,10 @@ using std::string_view;
 #ifdef __unix__
 #	include <unistd.h>
 #	include <libgen.h>
+#	include <libintl.h>
+#	define _(str) gettext((str))
 #else
+#	define _(str) (str)
 #	include <windows.h>
 #	include <io.h>
 #	define STDIN_FILENO 0

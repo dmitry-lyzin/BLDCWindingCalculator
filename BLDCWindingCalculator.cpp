@@ -10,16 +10,15 @@
 #define č const
 #define v̆ virtual
 #define š static
-#define ň noexcept
 #define ŏ override
 #define ŭ unsigned
 #define ٭ * __restrict
 #define ٭ʳ * __restrict
 #define ᚼ * __restrict
 #define ř __restrict
-#define čň __restrict const noexcept
-#define čňŏ __restrict const noexcept override
-#define ňŏ __restrict noexcept override
+#define čň __restrict const
+#define čňŏ __restrict const override
+#define ňŏ __restrict override
 #define STATIC constexpr static
 #define _₠čv̆šňŏŭř˂˃ᚼ
 
@@ -58,9 +57,9 @@ CONSOLE_SCREEN_BUFFER_INFO console_screen_buffer_info;
 bool	stdout_is_console = false;
 char	BUF[1024];
 
-₠ inline int fast_toupper( int c) noexcept { return c & ~('a' ^ 'A'); }
+₠ inline int fast_toupper( int c) { return c & ~('a' ^ 'A'); }
 // pow10(n) = 10ⁿ
-₠ ui pow10( ui n) noexcept
+₠ ui pow10( ui n)
 {
 	ui res = 1;
 	while( n --> 0)
@@ -68,7 +67,7 @@ char	BUF[1024];
 	return res;
 }
 // наибольший общий делить (НОД) a.k.a. greatest common divisor
-₠ ui NOD( ui a, ui b) noexcept
+₠ ui NOD( ui a, ui b)
 {
 	if( a < b )
 		swap(a, b);
@@ -77,11 +76,11 @@ char	BUF[1024];
 	return b;
 }
 // Наименьшее общее кратное a.k.a. least common multiple
-₠ ui NOK( ui a, ui b) noexcept
+₠ ui NOK( ui a, ui b)
 {
 	return a / NOD(a, b) * b;
 }
-˂ num> ₠ num div_mul( num x, ui divider, ui multiplier) noexcept
+˂ num> ₠ num div_mul( num x, ui divider, ui multiplier)
 {
 	if( 0 == multiplier )
 		return 0;
@@ -92,7 +91,7 @@ char	BUF[1024];
 }
 
 #pragma warning( disable: 4455 )
-₠ angle operator ""⁰ ( unsigned long long degree ) noexcept
+₠ angle operator ""⁰ ( unsigned long long degree )
 {
 	ui ui_degree = ui(degree);
 	₠ const angle _180⁰ = angle(-1)/2+1; // = 0b10....0 = 0x80....0
@@ -328,7 +327,7 @@ virtual	bool	load	( cchar ᚼ arg	)  ňŏ
 struct Param_range_step: Param_range
 {
 	ui	step;
-virtual	bool	load	( cchar ᚼ arg	) ň
+virtual	bool	load	( cchar ᚼ arg	)
 	{
 		if( !Param_range::load( arg))
 			return false;

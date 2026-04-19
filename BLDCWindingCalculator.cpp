@@ -649,6 +649,7 @@ Param *PARAMS[] = // все параметры
 , &par_NOK
 , &print_sxema
 };
+enum { slots_col = 0 };
 
 /*int tab_XpXs( void )
 {
@@ -686,7 +687,7 @@ Param *PARAMS[] = // все параметры
 // напечатать горизонтальную линию
 void print_hr( ui len)
 {
-	for( ui i = 0; i < len; i++)
+	while( len--)
 		printf( "─" );
 	printf( "\n");
 }
@@ -713,7 +714,7 @@ int find_n_print_schemes( void )
 					goto label1;
 			}
 
-			if( 0 == found++)
+			if( ! found++)
 			{
 				for( ui i = 0; i < size(PARAMS); i++)
 					first_val[i] = val[i];
@@ -725,6 +726,8 @@ int find_n_print_schemes( void )
 					if( first_val[i] != val[i])
 						PARAMS[i]->column = true;
 				}
+				if( first_val[slots_col] < val[slots_col] )
+					first_val[slots_col] = val[slots_col];
 			}
 		label1:;
 		}
@@ -754,7 +757,7 @@ int find_n_print_schemes( void )
 			printf( "%s\t", _(PARAMS[i]->shortname));
 	}
 	printf( "\n");
-	ui hr_len = PARAMS[0]->column ? slots_max : first_val[0];
+	ui hr_len = first_val[slots_col];
 	for( ui i = 0; i < size(PARAMS)-1; i++)
 	{
 		if( PARAMS[i]->column )

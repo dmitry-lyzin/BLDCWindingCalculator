@@ -1,0 +1,101 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the BLDCWindingCalculator package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: BLDCWindingCalculator 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-20 22:31+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#, c-format
+msgid "%u schemes found\n"
+msgstr "Найдено %u схем\n"
+
+msgid "1 scheme found\n"
+msgstr "Найдена 1 схема\n"
+
+msgid "It's not a number. Used by default"
+msgstr "Это не число. Пусть будет"
+
+#, c-format
+msgid "Number of %s must be divisible by %u!"
+msgstr "Число %s должно быть кратно %u!"
+
+msgid "Parameters"
+msgstr "Параметры"
+
+msgid "Too many slots"
+msgstr "Слишком много пазов"
+
+msgid "Usage"
+msgstr "Использование"
+
+msgid "WF"
+msgstr "Kнамот"
+
+msgid "Where"
+msgstr "Где"
+
+msgid "Wrong parameter"
+msgstr "Неверный параметр"
+
+msgid "cogging"
+msgstr "залипов"
+
+msgid "cogging steps"
+msgstr "точек залипания"
+
+msgid "config"
+msgstr "конфиг"
+
+msgid "configuration"
+msgstr "конфигурация мотора"
+
+msgid "display this help and exit"
+msgstr "выдать подсказку и сдохнуть"
+
+msgid "fraction"
+msgstr "дробь"
+
+msgid "magnet poles"
+msgstr "магнитных полюсов ротора"
+
+msgid "poles"
+msgstr "полюсов"
+
+msgid "q"
+msgstr "q"
+
+msgid "range"
+msgstr "диапазон"
+
+msgid "reduction (ƒ/ν)"
+msgstr "магнитная редукция (ƒ/ν, Гц/сˉ¹) - отношение частот электрической/вращения"
+
+msgid "slots"
+msgstr "пазов"
+
+msgid "slots in the stator"
+msgstr "пазов (полюсов) статора"
+
+msgid "slots per pole per phase"
+msgstr "базовое соотношение"
+
+msgid "winding factor"
+msgstr "коэффициент намотки"
+
+msgid "winding scheme"
+msgstr "схема намотки"
+
+msgid "ƒ/ν"
+msgstr "ƒ/ν"

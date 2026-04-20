@@ -27,6 +27,9 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <complex>
+#define _INTL_NO_DEFINE_MACRO_PRINTF 1
+#define _INTL_NO_DEFINE_MACRO_FPRINTF 1
+#include <libintl.h>
 
 using ui	= unsigned int;
 using angle	= unsigned long long;
@@ -35,13 +38,12 @@ using std::swap;
 using std::size; //#define size(x) (sizeof (x) / sizeof *(x))
 using std::string_view;
 
+inline cchar *_( cchar *msgid) { return gettext( msgid); }
+
 #ifdef __unix__
 #	include <unistd.h>
 #	include <libgen.h>
-#	include <libintl.h>
-#	define _(str) gettext((str))
 #else
-#	define _(str) (str)
 #	include <windows.h>
 #	include <io.h>
 #	define STDIN_FILENO 0
@@ -890,23 +892,7 @@ int main( int argc, char *const *argv )
 {
 	stdout_is_console = isatty( STDOUT_FILENO);
 
-#ifdef __unix__
-	//enum
-	//{ LANG_ENGLISH  = hash("en")
-	//, LANG_GERMAN   = hash("de")
-	//, LANG_RUSSIAN  = hash("ru")
-	//};
-
-	if( ! setlocale			(LC_MESSAGES, "")) perror(getenv("LANG")); // может LC_ALL ? Нет, десятичная запятая - зло!
-	if( ! bindtextdomain		(APPNAME, "."	)) perror("."		);
-	if( ! bind_textdomain_codeset	(APPNAME,"UTF-8")) perror("UTF-8"	);
-	if( ! textdomain		(APPNAME	)) perror(APPNAME	);
-
-	auto primarylangid = hash( getenv("LANG") );
-	//setlocale( LC_CTYPE, ".UTF8");
-#else
-	auto primarylangid = PRIMARYLANGID( GetUserDefaultLangID());
-
+#ifndef __unix__
 	SetConsoleOutputCP(65001);
 	//freopen("CON", "w", stdout);
 	if( isatty( STDERR_FILENO))
@@ -920,16 +906,10 @@ int main( int argc, char *const *argv )
 		// SetConsoleMode( hConsole, ENABLE_VIRTUAL_TERMINAL_PROCESSING); // под Windows7 не работает
 	}
 #endif
-
-	//enum { EN, DE, RU, MAX_LANG };
-	//ui	LANG	= EN;
-	//switch( primarylangid )
-	//{
-	//case LANG_ENGLISH	: LANG = EN; break;
-	//case LANG_GERMAN	: LANG = DE; break;
-	//case LANG_RUSSIAN	: LANG = RU; break;
-	//default			: LANG = EN; break;
-	//}
+	if( ! setlocale		(LC_MESSAGES, "")) perror("setlocale(): "); // может LC_ALL ? Нет, десятичная запятая - зло!
+	bindtextdomain		(APPNAME, "."	);
+	bind_textdomain_codeset	(APPNAME,"UTF-8");
+	textdomain		(APPNAME	);
 
 	if( 1 == argc )
 		return usage();

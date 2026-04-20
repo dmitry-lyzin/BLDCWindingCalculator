@@ -267,7 +267,7 @@ void strto( Frac *x, cchar *str, cchar **end)
 	ui nominator = 0;
 	ui denominator= 1;
 
-	//if( !num_sign_num( arg, '/', &multiplier, &denominator))
+	//if( !num_sign_num( arg, '/', &numerator, &denominator))
 	//	return false;
 	num_sign_num1( str, end, '/', &nominator, &denominator);
 
@@ -305,11 +305,11 @@ struct Param_range: Param
 #undef max
 	ui	min;
 	ui	max;
-₠	ui	minmax	( ui val	) čň	{ return (min <= val && val <= max) ? val : 0;		}
+₠	ui	minmax	( ui val	) čň	{ return (min <= val && val <= max) ? val : 0;			}
 
-virtual	void	usage_s	( void		) čňŏ	{ printf( " [%c<диапазон>]", opt);			}
-virtual	void	usage_l	( void		) čňŏ	{ printf( "\t%c<диапазон>\t%s\n", opt, _(longname));	}
-virtual	void	print	( ui val	) čňŏ	{ printf( "%u\t", val);					}
+virtual	void	usage_s	( void		) čňŏ	{ printf( " [%c<%s>]", opt, _("range"));			}
+virtual	void	usage_l	( void		) čňŏ	{ printf( "\t%c<%s>\t%s\n", opt, _("range"), _(longname));	}
+virtual	void	print	( ui val	) čňŏ	{ printf( "%u\t", val);						}
 virtual	bool	load	( cchar ᚼ arg	)  ňŏ
 	{
 		switch( num_sign_num( arg, '-', &min, &max))
@@ -405,8 +405,8 @@ virtual	bool	load	( cchar ᚼ arg		)  ňŏ	{ return false;					}
 struct Param_q			final: Print_config
 {
 	ui	sample;
-virtual	void	usage_s	( void			) čňŏ	{ printf( " [%c<дробь>]", opt);			}
-virtual	void	usage_l	( void			) čňŏ	{ printf( "\t%c<дробь>\t%s\n", opt,_(longname));}
+virtual	void	usage_s	( void			) čňŏ	{ printf( " [%c<%s>]", opt, _("fraction"));			}
+virtual	void	usage_l	( void			) čňŏ	{ printf( "\t%c<%s>\t%s\n", opt, _("fraction"), _(longname));	}
 virtual	ui	calc	( ui slots, ui poles	) čňŏ
 	{
 		slots /= 3;
@@ -418,21 +418,21 @@ virtual	ui	calc	( ui slots, ui poles	) čňŏ
 	}
 virtual	bool	load	( cchar ᚼ arg		)  ňŏ
 	{
-		ui multiplier = 0;
-		ui denominator= 1;
+		ui numerator	= 0;
+		ui denominator	= 1;
 
-		//if( !num_sign_num( arg, '/', &multiplier, &denominator))
+		//if( !num_sign_num( arg, '/', &numerator, &denominator))
 		//	return false;
-		num_sign_num( arg, '/', &multiplier, &denominator);
+		num_sign_num( arg, '/', &numerator, &denominator);
 
-		if( !multiplier || !denominator )
+		if( !numerator || !denominator )
 		{
 			fprintf( stderr, "%c%s: %s %s = 0?\n", opt, arg, _(longname), _(shortname));
 			exit( EXIT_FAILURE);
 		}
 
-		ui nod = NOD( multiplier, denominator);
-		sample = pack( multiplier/nod, denominator/nod );
+		ui nod = NOD( numerator, denominator);
+		sample = pack( numerator/nod, denominator/nod );
 		return true;
 	}
 
@@ -839,29 +839,20 @@ bool print_1_scheme( ui slots, ui poles )
 
 int usage( void)
 {
-	const char *USAGE =
-	"Usage:  %s [-h] [file]\n"
-	"\n"
-	"Parameters:\n"
-	"	file		Print text file\n"
-	"	-h		Print %s usage\n"
-	"\n"
-	"example:\n";
-
 	printf(	"\nПрограмма для расчета схем намотки многополюсных электромоторов (BLDC и т.д.)\n\n"
-		"Использование: %s [-h]", APPNAME);
+		"%s: " APPNAME " [-h]", _("Usage")							);
 	for( ui i = 0; i < size(PARAMS); i++)
 		PARAMS[i]->usage_s();
-	printf(	"\n\nопции:\n"
-		"\t-h\t\tнапечатать этот текст\n");
+	printf(	"\n\n%s:\n", _("Parameters")								);
+	printf(	"\t-h\t\t%s\n", _("display this help and exit")						);
 	for( ui i = 0; i < size(PARAMS); i++)
 		PARAMS[i]->usage_l();
 
-	printf(	"\nгде:\n\t<диапазон>\tэто пара чисел через знак '-', в этой паре первое или второе\n"
+	printf( "\n%s:\n", _("Where")									);
+	printf(	"\t<диапазон>\tэто пара чисел через знак '-', в этой паре первое или второе\n"
 		"\t\t\tили даже оба числа можно опустить (останется один '-')\n"
-		"\t\t\tили указать одно число (будет диапазон из одного числа)\n"
-		"\n"
-		);
+		"\t\t\tили указать одно число (будет диапазон из одного числа)\n"			);
+	//printf( "%s:\n", _("Example")									);
 
 	return EXIT_SUCCESS;
 }

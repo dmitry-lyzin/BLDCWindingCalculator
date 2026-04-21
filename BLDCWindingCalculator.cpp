@@ -686,6 +686,36 @@ enum { slots_col = 0 };
 }
 */
 
+auto utf8forward( string_view::const_iterator& p, ui offset)
+{
+	while( offset--)
+	{
+		auto c = *p++;
+		if( (c & 0b11100000) == 0b11000000 ) { p++;	continue; }
+		if( (c & 0b11110000) == 0b11100000 ) { p += 2;	continue; }
+		if( (c & 0b11111000) == 0b11110000 ) { p += 3;	continue; }
+		if( (c & 0b11111100) == 0b11111000 ) { p += 4;	continue; }
+		if( (c & 0b11111110) == 0b11111100 ) { p += 5;	continue; }
+	}
+	return p;
+}
+
+void marginprint( ui margin0, ui margin1, ui width, const string_view msg)
+{
+	auto p = msg.cbegin();
+	auto p1 = p;
+	while( utf8forward( p1, width) < msg.cend())
+	{
+		while( *--p1 != ' ' )
+			;
+		printf( "%*s%.*s\n", margin0, "", p1 - p, &*p);
+		p1++;
+		p = p1;
+		margin0 = margin1;
+	}
+	printf( "%*s%.*s\n", margin0, "", msg.cend() - p, &*p);
+}
+
 // напечатать горизонтальную линию
 void print_hr( ui len)
 {
@@ -849,11 +879,12 @@ int usage( void)
 	for( ui i = 0; i < size(PARAMS); i++)
 		PARAMS[i]->usage_l();
 
-	printf( "\n%s:\n", _("Where")									);
-	printf(	"\t<диапазон>\tэто пара чисел через знак '-', в этой паре первое или второе\n"
-		"\t\t\tили даже оба числа можно опустить (останется один '-')\n"
-		"\t\t\tили указать одно число (будет диапазон из одного числа)\n"			);
-	//printf( "%s:\n", _("Example")									);
+	printf( "\n%s:\n\t<%s>\t", _("Where"), _("range")						);
+	marginprint( 0, 24, 72-24, _(
+		"is a pair of numbers separated by a '-' sign. In this pair, the first or second "
+		"or even both numbers can be omitted (one '-' remains) or one number can be specified "
+		"(there will be a range of one number)"
+		));
 
 	return EXIT_SUCCESS;
 }

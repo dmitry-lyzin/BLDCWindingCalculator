@@ -898,7 +898,7 @@ int main( int argc, char *const *argv )
 	}
 #endif
 	if( ! setlocale		(LC_MESSAGES, "")) perror("setlocale(): "); // может LC_ALL ? Нет, десятичная запятая - зло!
-	bindtextdomain		(APPNAME, "."	);
+	bindtextdomain		(APPNAME, LOCALE);
 	bind_textdomain_codeset	(APPNAME,"UTF-8");
 	textdomain		(APPNAME	);
 

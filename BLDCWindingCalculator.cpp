@@ -604,9 +604,9 @@ virtual	void	print	( ui val		) čňŏ
 		{
 			// ANSI escape color codes
 			static cchar *color_codes[3] =
-			{ "96" // Bright Cyan //"94" // Bright Blue
+			{ "91" // Bright Red // "93" // Bright Yellow
 			, "92" // Bright Green
-			, "93" // Bright Yellow
+			, "94" // Bright Blue // "96" // Bright Cyan
 			};
 
 			assert( ui(fast_toupper(*sxema)-'A') < size(color_codes) );
@@ -617,9 +617,9 @@ virtual	void	print	( ui val		) čňŏ
 		for( ui i = 0; i < slots; sxema++, i++ )
 		{
 			static WORD attributes[3] =
-			{ FOREGROUND_INTENSITY | FOREGROUND_BLUE | FOREGROUND_GREEN
-			, FOREGROUND_INTENSITY | FOREGROUND_GREEN
-			, FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED
+			{ FOREGROUND_INTENSITY	| FOREGROUND_RED
+			, FOREGROUND_INTENSITY	| FOREGROUND_GREEN
+			, FOREGROUND_INTENSITY	| FOREGROUND_BLUE
 			};
 
 			assert( ui(fast_toupper(*sxema)-'A') < size(attributes) );

@@ -34,6 +34,9 @@ msgstr "Число %s должно быть кратно %u!"
 msgid "Parameters"
 msgstr "Параметры"
 
+msgid "The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)"
+msgstr "Программа для расчета схем намотки многополюсных электромоторов (BLDC и т.д.)"
+
 msgid "Too many slots"
 msgstr "Слишком много пазов"
 

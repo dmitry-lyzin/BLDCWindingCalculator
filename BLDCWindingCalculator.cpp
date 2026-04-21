@@ -839,11 +839,12 @@ bool print_1_scheme( ui slots, ui poles )
 
 int usage( void)
 {
-	printf(	"\nПрограмма для расчета схем намотки многополюсных электромоторов (BLDC и т.д.)\n\n"
-		"%s: " APPNAME " [-h]", _("Usage")							);
+	printf(	"\n%s\n\n%s: " APPNAME " [-h]"
+	      , _("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)")
+	      , _("Usage")										);
 	for( ui i = 0; i < size(PARAMS); i++)
 		PARAMS[i]->usage_s();
-	printf(	"\n\n%s:\n", _("Parameters")								);
+	printf(	"\n%s:\n", _("Parameters")								);
 	printf(	"\t-h\t\t%s\n", _("display this help and exit")						);
 	for( ui i = 0; i < size(PARAMS); i++)
 		PARAMS[i]->usage_l();

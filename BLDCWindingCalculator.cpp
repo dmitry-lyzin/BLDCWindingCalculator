@@ -1,44 +1,30 @@
-#define _USE_MATH_DEFINES
-#define STATIC_TESTS 1
 #define STATIC_ASSERT(exp) static_assert( exp, #exp " FAIL!" );
-#define ˂ template< class
-#define ˂ᵗ template< class
-#define ˂˃ template<>
-#define 〇 operator
-#define ￮ operator
-#define ₠ constexpr
-#define č const
-#define v̆ virtual
-#define š static
-#define ŏ override
-#define ŭ unsigned
-#define ٭ * __restrict
-#define ٭ʳ * __restrict
-#define ᚼ * __restrict
-#define ř __restrict
-#define čň __restrict const
-#define čňŏ __restrict const override
-#define ňŏ __restrict override
-#define STATIC constexpr static
-#define _₠čv̆šňŏŭř˂˃ᚼ
+#define group(x) true
+#define ˂	template< class
+#define ˂˃	template<>
+#define cØnst	const override
+#define Ø	override
+#define STATIC	constexpr static
+#define CE	constexpr
 
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <inttypes.h>
+#define _USE_MATH_DEFINES
 #include <complex>
 #define _INTL_NO_DEFINE_MACRO_PRINTF 1
 #define _INTL_NO_DEFINE_MACRO_FPRINTF 1
 #include <libintl.h>
 
 using ui	= unsigned int;
+using ulong	= unsigned long;
+using ulonglong	= unsigned long long;
 using angle	= unsigned long long;
 using cchar	= const char;
 using std::swap;
-using std::size; //#define size(x) (sizeof (x) / sizeof *(x))
+using std::size;
 using std::string_view;
-
-inline cchar *_( cchar *msgid) { return gettext( msgid); }
 
 #ifdef __unix__
 #	include <unistd.h>
@@ -50,18 +36,21 @@ inline cchar *_( cchar *msgid) { return gettext( msgid); }
 #	define STDOUT_FILENO 1
 #	define STDERR_FILENO 2
 #	pragma warning( disable: 4996)
-
-HANDLE hConsole = nullptr;
-CONSOLE_SCREEN_BUFFER_INFO console_screen_buffer_info;
-
+	HANDLE hConsole = nullptr;
+	CONSOLE_SCREEN_BUFFER_INFO console_screen_buffer_info;
 #endif
 
-bool	stdout_is_console = false;
+bool	STDOUT_IS_A_TTY = false;
 char	BUF[1024];
 
-₠ inline int fast_toupper( int c) { return c & ~('a' ^ 'A'); }
+inline cchar *_( cchar *msgid)
+{
+	return gettext( msgid);
+}
+
+CE inline int fast_toupper( int c) { return c & ~('a' ^ 'A'); }
 // pow10(n) = 10ⁿ
-₠ ui pow10( ui n)
+CE ui pow10( ui n)
 {
 	ui res = 1;
 	while( n --> 0)
@@ -69,7 +58,7 @@ char	BUF[1024];
 	return res;
 }
 // наибольший общий делить (НОД) a.k.a. greatest common divisor
-₠ ui NOD( ui a, ui b)
+CE ui НОД( ui a, ui b)
 {
 	if( a < b )
 		swap(a, b);
@@ -78,30 +67,30 @@ char	BUF[1024];
 	return b;
 }
 // Наименьшее общее кратное a.k.a. least common multiple
-₠ ui NOK( ui a, ui b)
+CE ui НОК( ui a, ui b)
 {
-	return a / NOD(a, b) * b;
+	return a / НОД(a, b) * b;
 }
-˂ num> ₠ num div_mul( num x, ui divider, ui multiplier)
+˂ num> CE num div_mul( num x, ui divider, ui multiplier)
 {
 	if( 0 == multiplier )
 		return 0;
-	ui nod = NOD( divider, multiplier);
+	ui nod = НОД( divider, multiplier);
 	divider    /= nod;
 	multiplier /= nod;
 	return x / divider * multiplier + x % divider * multiplier / divider;
 }
 
 #pragma warning( disable: 4455 )
-₠ angle operator ""⁰ ( unsigned long long degree )
+CE angle operator ""⁰ ( unsigned long long degree )
 {
 	ui ui_degree = ui(degree);
-	₠ const angle _180⁰ = angle(-1)/2+1; // = 0b10....0 = 0x80....0
+	CE const angle _180⁰ = angle(-1)/2+1; // = 0b10....0 = 0x80....0
 	angle ret = _180⁰ * (ui_degree / 180u);
 	ui_degree %= 180u;
 	return ret + div_mul( _180⁰, 180u, ui_degree);
 }
-#if STATIC_TESTS
+#if group( тесты для углов )
 STATIC_ASSERT( 180⁰/180	==   1⁰ );
 STATIC_ASSERT(  90⁰/3	==  30⁰ );
 STATIC_ASSERT( 300⁰/5	==  60⁰ );
@@ -110,35 +99,31 @@ STATIC_ASSERT( 300⁰/3*2	== 200⁰ );
 STATIC_ASSERT( div_mul(333⁰, 3, 2) == 222⁰ );
 #endif
 
-₠ angle very_small_angle = 32*4;
-//₠ double very_small_angle1 = double(very_small_angle) / 180⁰;
+// очень маленький угол
+CE angle ε⁰ = 32*4;
 
-// перегрузки для преобразований число <-> строка
-
-#define group1(x) true
-
-#if group1(перегрузки для преобразований число <-> строка)
+#if group( перегрузки для преобразований число <-> строка )
 int fprint( FILE *stream, int		x ) { return fprintf( stream, "%d",	x ); }
-int fprint( FILE *stream, ŭ int		x ) { return fprintf( stream, "%u",	x ); }
+int fprint( FILE *stream, ui		x ) { return fprintf( stream, "%u",	x ); }
 int fprint( FILE *stream, long		x ) { return fprintf( stream, "%ld",	x ); }
 int fprint( FILE *stream, long long	x ) { return fprintf( stream, "%lld",	x ); }
-int fprint( FILE *stream, ŭ long	x ) { return fprintf( stream, "%lu",	x ); }
-int fprint( FILE *stream, ŭ long long	x ) { return fprintf( stream, "%llu",	x ); }
+int fprint( FILE *stream, ulong		x ) { return fprintf( stream, "%lu",	x ); }
+int fprint( FILE *stream, ulonglong	x ) { return fprintf( stream, "%llu",	x ); }
 int fprint( FILE *stream, float		x ) { return fprintf( stream, "%g",	x ); }
 int fprint( FILE *stream, double	x ) { return fprintf( stream, "%g",	x ); }
 
 ˂ Num> Num	strto			  (cchar *str, cchar **end) { return 0;	STATIC_ASSERT( false		); }
 ˂˃ int		strto< int		> (cchar *str, cchar **end) { return strtol	(str, (char **)end, 0	); }
-˂˃ ŭ int	strto< ŭ int		> (cchar *str, cchar **end) { return strtoul	(str, (char **)end, 0	); }
+˂˃ ui		strto< ui		> (cchar *str, cchar **end) { return strtoul	(str, (char **)end, 0	); }
 ˂˃ long		strto< long		> (cchar *str, cchar **end) { return strtol	(str, (char **)end, 0	); }
 ˂˃ long long	strto< long long	> (cchar *str, cchar **end) { return strtoll	(str, (char **)end, 0	); }
-˂˃ ŭ long	strto< ŭ long		> (cchar *str, cchar **end) { return strtoul	(str, (char **)end, 0	); }
-˂˃ ŭ long long	strto< ŭ long long	> (cchar *str, cchar **end) { return strtoull	(str, (char **)end, 0	); }
+˂˃ ulong	strto< ulong		> (cchar *str, cchar **end) { return strtoul	(str, (char **)end, 0	); }
+˂˃ ulonglong	strto< ulonglong	> (cchar *str, cchar **end) { return strtoull	(str, (char **)end, 0	); }
 ˂˃ float	strto< float		> (cchar *str, cchar **end) { return strtof	(str, (char **)end	); }
 ˂˃ double	strto< double		> (cchar *str, cchar **end) { return strtod	(str, (char **)end	); }
 #endif
 
-˂ num> bool str_to_num( cchar ᚼ str, num ᚼ x)
+˂ num> bool str_to_num( cchar *str, num *x)
 {
 	cchar *end = str;
 	num res = strto<num>( str, &end);
@@ -148,7 +133,6 @@ int fprint( FILE *stream, double	x ) { return fprintf( stream, "%g",	x ); }
 		return true;
 	}
 
-	//fprintf( stderr, "%s: %s %u\n", str, _("It's not a number. Used by default"), *x);
 	fprintf( stderr, "%s: %s ", str, _("It's not a number. Used by default"));
 	fprint( stderr, *x);
 	fprintf( stderr, "\n");
@@ -165,8 +149,7 @@ bool str_to_num1( string_view str, long *x)
 	if( end - &str[0] == size(str) )
 		return true;
 
-	//fprintf( stderr, "%s: %s %u\n", str, _("It's not a number. Used by default"), *x);
-	fprintf( stderr, "%.*s: %s ", int(size(str)), &str[0], _("It's not a number. Used by default"));
+	fprintf( stderr, "%.*s: %s ", int( size( str)), &str[0], _("It's not a number. Used by default"));
 	fprint( stderr, *x);
 	fprintf( stderr, "\n");
 	return false;
@@ -189,7 +172,7 @@ bool str_to_num1( cchar *str, cchar *end, long *x)
 	return true;
 }
 
-˂ num> ui num_sign_num( cchar ᚼ str, cchar sign, num *x1, num *x2 )
+˂ num> ui num_sign_num( cchar *str, cchar sign, num *x1, num *x2 )
 {
 	cchar *after_sign = str;
 	while( *after_sign)
@@ -207,7 +190,7 @@ bool str_to_num1( cchar *str, cchar *end, long *x)
 	return str_to_num( str, x1);
 }
 
-ui num_sign_num1( cchar ᚼ str, cchar sign, long *x1, long *x2 )
+ui num_sign_num1( cchar *str, cchar sign, long *x1, long *x2 )
 {
 	cchar *after_sign = str;
 	while( *after_sign)
@@ -225,63 +208,6 @@ ui num_sign_num1( cchar ᚼ str, cchar sign, long *x1, long *x2 )
 	return str_to_num1( str, x1);
 }
 
-/*
-template< class Num>
-ui num_sign_num1( cchar *str, cchar *end, cchar sign, Num *x1, Num *x2 )
-{
-	for( cchar *after_sign = str; after_sign < end; after_sign++)
-	{
-		if( *after_sign == sign)
-		{
-			ui res = 1;
-			if( str[0] != sign)
-				res = str_to_num1( str, after_sign, x1);
-			after_sign++;
-			if( after_sign < end )
-				res = res && str_to_num1( after_sign, end, x2);
-			return res * 2;
-		}
-	}
-	return str_to_num1( str, end, x1);
-}
-
-struct Frac
-{
-	short	num;
-	short	den;
-
-₠	Frac		( void		): num(0), den(1) {}
-₠	Frac		( int n		): num(n), den(1) {}
-₠	Frac		( int n, int d	): num(n), den(d)
-	{
-		ui nod = NOD(n, d);
-		num /= nod;
-		den /= nod;
-	}
-};
-
-STATIC_ASSERT(sizeof ui == sizeof Frac);
-
-void strto( Frac *x, cchar *str, cchar **end)
-{
-	ui nominator = 0;
-	ui denominator= 1;
-
-	//if( !num_sign_num( arg, '/', &numerator, &denominator))
-	//	return false;
-	num_sign_num1( str, end, '/', &nominator, &denominator);
-
-	if( !nominator || !denominator )
-	{
-		*end = nullptr;
-		return;
-	}
-
-}
-int fprintf( FILE *stream, Frac	x ) { return fprintf( stream, "%d/%u",	x.num, x.den ); }
-
-*/
-
 struct Param
 {
 	bool	column;
@@ -289,13 +215,13 @@ struct Param
 	cchar*	shortname;
 	cchar*	longname;
 
-virtual	void	usage_s	( void			) čň	= 0;
-virtual	void	usage_l	( void			) čň	= 0;
-virtual	ui	calc	( ui slots, ui poles	) čň	= 0;
-virtual	void	print	( ui val		) čň	= 0;
-virtual	bool	load	( cchar ᚼ arg		)	= 0;
+virtual	void	usage_s	( void			) const	= 0;
+virtual	void	usage_l	( void			) const	= 0;
+virtual	ui	calc	( ui slots, ui poles	) const	= 0;
+virtual	void	print	( ui val		) const	= 0;
+virtual	bool	load	( cchar *arg		)	= 0;
 
-₠	Param		( char _opt, cchar *_shortname, cchar *_longname)
+CE	Param		( char _opt, cchar *_shortname, cchar *_longname)
 	: column(false), opt(_opt), shortname(_shortname), longname(_longname) {}
 };
 
@@ -305,12 +231,12 @@ struct Param_range: Param
 #undef max
 	ui	min;
 	ui	max;
-₠	ui	minmax	( ui val	) čň	{ return (min <= val && val <= max) ? val : 0;			}
+CE	ui	minmax	( ui val	) const	{ return (min <= val && val <= max) ? val : 0;			}
 
-virtual	void	usage_s	( void		) čňŏ	{ printf( " [%c<%s>]", opt, _("range"));			}
-virtual	void	usage_l	( void		) čňŏ	{ printf( "\t%c<%s>\t%s\n", opt, _("range"), _(longname));	}
-virtual	void	print	( ui val	) čňŏ	{ printf( "%u\t", val);						}
-virtual	bool	load	( cchar ᚼ arg	)  ňŏ
+virtual	void	usage_s	( void		) cØnst	{ printf( " [%c<%s>]", opt, _("range"));			}
+virtual	void	usage_l	( void		) cØnst	{ printf( "\t%c<%s>\t%s\n", opt, _("range"), _(longname));	}
+virtual	void	print	( ui val	) cØnst	{ printf( "%u\t", val);						}
+virtual	bool	load	( cchar *arg	) Ø
 	{
 		switch( num_sign_num( arg, '-', &min, &max))
 		{
@@ -322,14 +248,14 @@ virtual	bool	load	( cchar ᚼ arg	)  ňŏ
 		return false;
 	}
 
-₠	Param_range	( char opt, cchar *shortname, cchar *longname, ui _min, ui _max)
+CE	Param_range	( char opt, cchar *shortname, cchar *longname, ui _min, ui _max)
 	: Param( opt, shortname, longname), min(_min), max(_max) {}
 };
 
 struct Param_range_step: Param_range
 {
 	ui	step;
-virtual	bool	load	( cchar ᚼ arg	)
+virtual	bool	load	( cchar *arg	)
 	{
 		if( !Param_range::load( arg))
 			return false;
@@ -339,50 +265,49 @@ virtual	bool	load	( cchar ᚼ arg	)
 			fprintf( stderr, _("Number of %s must be divisible by %u!"), _(longname), step );
 			fprintf( stderr, "\n");
 			return false;
-			//exit( EXIT_FAILURE);
 		}
 
 		return true;
 	}
-₠	Param_range_step( char opt, cchar *shortname, cchar *longname, ui min, ui max, ui _step)
+CE	Param_range_step( char opt, cchar *shortname, cchar *longname, ui min, ui max, ui _step)
 	: Param_range( opt, shortname, longname, min, max), step(_step) {}
 };
 
 struct Param_poles		final: Param_range_step
 {
-virtual	ui	calc	( ui slots, ui poles	) čňŏ	{ return poles; }
-₠	Param_poles	( void			): Param_range_step( 'p', "poles", "magnet poles", 2, 100, 2) {}
+virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return poles; }
+CE	Param_poles	( void			): Param_range_step( 'p', "poles", "magnet poles", 2, 100, 2) {}
 } par_poles;
 
 struct Param_slots		final: Param_range_step
 {
-virtual	ui	calc	( ui slots, ui poles	) čňŏ	{ return slots; }
-virtual	bool	load	( cchar ᚼ arg		)  ňŏ
+virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return slots; }
+virtual	bool	load	( cchar *arg		) Ø
 	{
 		if( !Param_range_step::load( arg))
 			return false;
 
 		if( max >= size(BUF) / 2)
 		{
-			fprintf( stderr, "%c%s: %s (> %u)!\n", opt, arg, _("Too many slots"), ui(size(BUF)) / 2);
+			fprintf( stderr, "%c%s: %s (> %u)!\n", opt, arg, _("Too many slots"), ui( size( BUF)) / 2);
 			exit( EXIT_FAILURE);
 		}
 
 		return true;
 	}
-₠	Param_slots	( void			)	: Param_range_step( 's', "slots", "slots in the stator", 3, 99, 3) {}
+CE	Param_slots	( void			)	: Param_range_step( 's', "slots", "slots in the stator", 3, 99, 3) {}
 } par_slots;
 
 struct Param_NOK		final: Param_range
 {
-virtual	ui	calc	( ui slots, ui poles	) čňŏ	{ return minmax( NOK( slots, poles));	}
-₠	Param_NOK	( void			)	: Param_range( 'c', "cogging", "cogging steps", 0, -1) {}
+virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles));	}
+CE	Param_NOK	( void			)	: Param_range( 'c', "cogging", "cogging steps", 0, -1) {}
 } par_NOK;
 
 struct Param_reduction		final: Param_range
 {
-virtual	ui	calc	( ui slots, ui poles	) čňŏ	{ return minmax( NOK( slots, poles)/6);	}
-₠	Param_reduction	( void			)	: Param_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0, -1) {}
+virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles)/6);	}
+CE	Param_reduction	( void			)	: Param_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0, -1) {}
 } par_reduct;
 
 struct Print_config: Param
@@ -392,37 +317,35 @@ STATIC	ui	pack	( ui slots, ui poles	)	{ return (slots << half) + poles;		}
 STATIC	ui	slots	( ui val		)	{ return val >> half;				}
 STATIC	ui	poles	( ui val		)	{ return val & ~(ui(-1) << half);		}
 
-virtual	void	usage_s	( void			) čňŏ	{						}
-virtual	void	usage_l	( void			) čňŏ	{						}
-virtual	ui	calc	( ui slots, ui poles	) čňŏ	{ return pack( slots, poles);			}
-virtual	void	print	( ui val		) čňŏ	{ printf( "%u/%u\t", slots(val), poles(val) );	}
-virtual	bool	load	( cchar ᚼ arg		)  ňŏ	{ return false;					}
+virtual	void	usage_s	( void			) cØnst	{						}
+virtual	void	usage_l	( void			) cØnst	{						}
+virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return pack( slots, poles);			}
+virtual	void	print	( ui val		) cØnst	{ printf( "%u/%u\t", slots(val), poles(val) );	}
+virtual	bool	load	( cchar *arg		) Ø	{ return false;					}
 
-₠	Print_config	( char opt, cchar *shortname, cchar *longname): Param( opt, shortname, longname) {}
-₠	Print_config	( void			)	: Param( 0, "config", "configuration") {}
+CE	Print_config	( char opt, cchar *shortname, cchar *longname): Param( opt, shortname, longname) {}
+CE	Print_config	( void			)	: Param( 0, "config", "configuration") {}
 } print_config;
 
 struct Param_q			final: Print_config
 {
 	ui	sample;
-virtual	void	usage_s	( void			) čňŏ	{ printf( " [%c<%s>]", opt, _("fraction"));			}
-virtual	void	usage_l	( void			) čňŏ	{ printf( "\t%c<%s>\t%s\n", opt, _("fraction"), _(longname));	}
-virtual	ui	calc	( ui slots, ui poles	) čňŏ
+virtual	void	usage_s	( void			) cØnst	{ printf( " [%c<%s>]", opt, _("fraction"));			}
+virtual	void	usage_l	( void			) cØnst	{ printf( "\t%c<%s>\t%s\n", opt, _("fraction"), _(longname));	}
+virtual	ui	calc	( ui slots, ui poles	) cØnst
 	{
 		slots /= 3;
-		ui nod = NOD( slots, poles);
+		ui nod = НОД( slots, poles);
 		ui val = pack( slots/nod, poles/nod );
 		if( !sample || val == sample )
 			return val;
 		return 0;
 	}
-virtual	bool	load	( cchar ᚼ arg		)  ňŏ
+virtual	bool	load	( cchar *arg		) Ø
 	{
 		ui numerator	= 0;
 		ui denominator	= 1;
 
-		//if( !num_sign_num( arg, '/', &numerator, &denominator))
-		//	return false;
 		num_sign_num( arg, '/', &numerator, &denominator);
 
 		if( !numerator || !denominator )
@@ -431,12 +354,12 @@ virtual	bool	load	( cchar ᚼ arg		)  ňŏ
 			exit( EXIT_FAILURE);
 		}
 
-		ui nod = NOD( numerator, denominator);
+		ui nod = НОД( numerator, denominator);
 		sample = pack( numerator/nod, denominator/nod );
 		return true;
 	}
 
-₠	Param_q		( void			)	: Print_config( 'q', "q", "slots per pole per phase"), sample(0) {}
+CE	Param_q		( void			)	: Print_config( 'q', "q", "slots per pole per phase"), sample(0) {}
 } par_q;
 
 struct Param_winding_factor	final: Param_range
@@ -445,7 +368,7 @@ STATIC	ui	nuls	= 6;
 STATIC	ui	scale	= pow10( nuls);
 STATIC	ui	toscale	( double x		)	{ return ui((x + .5/scale) * scale); }
 
-virtual	ui	calc	( ui slots, ui poles	) čňŏ
+virtual	ui	calc	( ui slots, ui poles	) cØnst
 	{
 		using namespace std;
 		complex<double> res = 0;
@@ -453,7 +376,7 @@ virtual	ui	calc	( ui slots, ui poles	) čňŏ
 		complex<double>	ȓ = polar( 1., M_PI / slots * poles );
 		angle		ρ = div_mul( 180⁰, slots, poles);
 		complex<double>	â = ȓ;
-		angle		α = 30⁰ + very_small_angle + ρ;
+		angle		α = 30⁰ + ρ + ε⁰;
 
 		int EMF = 0;
 		int previous_EMF = 2; // при i == 0 EMF равнялся бы 2
@@ -475,12 +398,12 @@ virtual	ui	calc	( ui slots, ui poles	) čňŏ
 		res += double(2 - previous_EMF); // i == 0
 		return minmax( toscale( abs(res) / (slots * 2)) );
 	}
-virtual	void	print	( ui val		) čňŏ
+virtual	void	print	( ui val		) cØnst
 	{
 		if( val < scale) printf( ".%0*d\t", nuls, val		);
 		else             printf( "%g\t", double(val) / scale	);
 	}
-virtual	bool	load	( cchar ᚼ arg		)  ňŏ
+virtual	bool	load	( cchar *arg		) Ø
 	{
 		double d_min = min; d_min /= scale;
 		double d_max = max; d_max /= scale;
@@ -493,7 +416,7 @@ virtual	bool	load	( cchar ᚼ arg		)  ňŏ
 		case 0:	return false;
 		case 1:	max = min;
 		case 2:
-			if( d_min > 1. ||  d_max > 1. )
+			if( d_min > 1. || d_max > 1. )
 			{
 				fprintf( stderr, "%c%s: %s > 1 ?\n", opt, arg, _(longname) );
 				exit( EXIT_FAILURE);
@@ -504,12 +427,12 @@ virtual	bool	load	( cchar ᚼ arg		)  ňŏ
 		return false;
 	}
 
-₠	Param_winding_factor( void		)	: Param_range( 'w', "WF", "winding factor", 0, scale) {}
+CE	Param_winding_factor( void		)	: Param_range( 'w', "WF", "winding factor", 0, scale) {}
 } par_winding_factor;
 
 struct Print_sxema		final: Print_config
 {
-STATIC	bool	test1	( ui slots, ui poles	)	{ return (poles / NOD( slots/3, poles)) % 3;		}
+STATIC	bool	test1	( ui slots, ui poles	)	{ return (poles / НОД( slots/3, poles)) % 3;		}
 STATIC	bool	test2	( ui slots, ui poles	)
 	{
 		if( slots == poles )
@@ -518,7 +441,7 @@ STATIC	bool	test2	( ui slots, ui poles	)
 		assert( slots % 3 == 0 && slots >= 3 );	// Количество пазов не делится на 3!
 		assert( poles % 2 == 0 && poles >= 2 );	// Не четное количество полюсов!\n
 
-		angle α = 30⁰ + very_small_angle;
+		angle α = 30⁰ + ε⁰;
 		angle ρ = div_mul( 180⁰, slots, poles);
 
 		ui a = 0; ui b = 0; ui c = 0;
@@ -538,12 +461,11 @@ STATIC	bool	test2	( ui slots, ui poles	)
 
 		return (a == b && a == c && A == B && A == C) == test1( slots, poles);
 	}
-virtual	ui	calc	( ui slots, ui poles	) čňŏ	{ return test1(slots, poles) ? pack(slots, poles) : 0;	}
-virtual	void	print	( ui val		) čňŏ
+virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return test1(slots, poles) ? pack(slots, poles) : 0;	}
+virtual	void	print	( ui val		) cØnst
 	{
 		ui slots = Print_config::slots(val);
 		ui poles = Print_config::poles(val);
-		//printf( "%u/%u\t", slots, poles);
 
 		assert( slots != poles );		// Количество полюсов равно количеству пазов!
 		assert( slots % 3 == 0 && slots );	// Количество пазов не делится на 3!
@@ -552,7 +474,7 @@ virtual	void	print	( ui val		) čňŏ
 		angle ρ = div_mul( 180⁰, slots, poles);
 
 		char *sxema = BUF;
-		angle α = 30⁰ + very_small_angle;
+		angle α = 30⁰ + ε⁰;
 		ui a = 0; ui b = 0; ui c = 0;
 		ui A = 0; ui B = 0; ui C = 0;
 		for( ui i = 0; i < slots; i++ )
@@ -593,9 +515,9 @@ virtual	void	print	( ui val		) čňŏ
 					*p ^= ('B' ^ 'C');
 		}
 
-		if( ! stdout_is_console )
+		if( ! STDOUT_IS_A_TTY )
 		{
-			printf("%.*s\t", slots, sxema);
+			printf("%.*s", slots, sxema);
 			return;
 		}
 
@@ -629,9 +551,9 @@ virtual	void	print	( ui val		) čňŏ
 		SetConsoleTextAttribute( hConsole, console_screen_buffer_info.wAttributes);
 #endif
 	}
-₠	Print_sxema	( void			)	: Print_config( 0, "winding scheme", "winding scheme") {}
+CE	Print_sxema	( void			)	: Print_config( 0, "winding scheme", "winding scheme") {}
 } print_sxema;
-#if STATIC_TESTS
+#if group( тесты алгоритма поиска схемы намотки )
 STATIC_ASSERT( Print_sxema::test2( 24, 18) );
 STATIC_ASSERT( Print_sxema::test2( 24, 20) );
 STATIC_ASSERT( Print_sxema::test2( 24, 22) );
@@ -653,42 +575,10 @@ Param *PARAMS[] = // все параметры
 };
 enum { slots_col = 0 };
 
-/*int tab_XpXs( void )
+// продвинуть указатель на utf8 символы p на count позиций
+auto utf8forward( cchar *p, ui count)
 {
-	printf(	"%s->", _("slots") );
-	for( ui slots = slots_min; slots <= slots_max; slots += 3)
-		printf(	"\t%u", slots );
-	printf(	"\n");
-
-	printf(	"%s\t", _(POLES) );
-	for( ui slots = slots_min; slots <= slots_max; slots += 3)
-		printf(	"────────" );
-	printf(	"\n");
-
-	ui found = 0;
-	for( ui poles = poles_min; poles <= poles_max; poles += 2)
-	{
-		printf(	"%u", poles );
-		for( ui slots = slots_min; slots <= slots_max; slots += 3)
-		{
-			printf( "\t");
-			if( exist_sxema( slots, poles ))
-			{
-				found++;
-				printf(	"%u", NOK( slots, poles)/6 );
-			}
-		}
-		printf(	"\n");
-	}
-
-	printf(_(SCHEMES_FOUND), found);
-	return !found;
-}
-*/
-
-auto utf8forward( string_view::const_iterator& p, ui offset)
-{
-	while( offset--)
+	while( count--)
 	{
 		auto c = *p++;
 		if( (c & 0b11100000) == 0b11000000 ) { p++;	continue; }
@@ -700,20 +590,23 @@ auto utf8forward( string_view::const_iterator& p, ui offset)
 	return p;
 }
 
+// печать msg в колонку шириной width, с отступом margin0 в 1-ой строке,
+// и margin1 у всех остальных
 void marginprint( ui margin0, ui margin1, ui width, const string_view msg)
 {
-	auto p = msg.cbegin();
-	auto p1 = p;
-	while( utf8forward( p1, width) < msg.cend())
+	cchar *p	= msg.data();
+	cchar *end	= msg.length() + p;
+	cchar *p1;
+	while( (p1 = utf8forward( p, width)) < end)
 	{
 		while( *--p1 != ' ' )
 			;
-		printf( "%*s%.*s\n", margin0, "", int( p1 - p), &*p);
+		printf( "%*s%.*s\n", margin0, "", int(p1 - p), p);
 		p1++;
 		p = p1;
 		margin0 = margin1;
 	}
-	printf( "%*s%.*s\n", margin0, "", int( msg.cend() - p), &*p);
+	printf( "%*s%.*s\n", margin0, "", int(end - p), p);
 }
 
 // напечатать горизонтальную линию
@@ -731,9 +624,8 @@ int find_n_print_schemes( void )
 	ui &poles_min = par_poles.min;
 	ui &poles_max = par_poles.max;
 
-	//bool	column	[size(PARAMS)] = {false};
-	ui	first_val[size(PARAMS)];
-	ui	val	[size(PARAMS)];
+	ui val0	[size(PARAMS)];
+	ui val	[size(PARAMS)];
 
 	ui found = 0;
 	for( ui slots = slots_min; slots <= slots_max; slots += 3)
@@ -749,17 +641,17 @@ int find_n_print_schemes( void )
 			if( ! found++)
 			{
 				for( ui i = 0; i < size(PARAMS); i++)
-					first_val[i] = val[i];
+					val0[i] = val[i];
 			}
 			else
 			{
 				for( ui i = 0; i < size(PARAMS)-1; i++) // последнюю колонку не проверяем
 				{
-					if( first_val[i] != val[i])
+					if( val0[i] != val[i])
 						PARAMS[i]->column = true;
 				}
-				if( first_val[slots_col] < val[slots_col] )
-					first_val[slots_col] = val[slots_col];
+				if( val0[slots_col] < val[slots_col] )
+					val0[slots_col] = val[slots_col];
 			}
 		label1:;
 		}
@@ -778,7 +670,7 @@ int find_n_print_schemes( void )
 	{
 		if( ! PARAMS[i]->column )
 		{
-			PARAMS[i]->print( first_val[i]);
+			PARAMS[i]->print( val0[i]);
 			printf( "%s\n", _(PARAMS[i]->longname) );
 		}
 	}
@@ -789,7 +681,7 @@ int find_n_print_schemes( void )
 			printf( "%s\t", _(PARAMS[i]->shortname));
 	}
 	printf( "\n");
-	ui hr_len = first_val[slots_col];
+	ui hr_len = val0[slots_col];
 	for( ui i = 0; i < size(PARAMS)-1; i++)
 	{
 		if( PARAMS[i]->column )
@@ -827,46 +719,6 @@ int find_n_print_schemes( void )
 	return found;
 }
 
-/*
-//printf( "%s:\t%u\n%s:\t%u\n%s:\t%0.2g%% = %0.2g°\n", _(MAGNET_POLES), poles, _(SLOTS), slots, _(GAP), double(gap) / 60⁰ * 100., double(gap) / 1⁰ );
-bool print_1_scheme( ui slots, ui poles )
-{
-	//ui val[size(PARAMS)] = { slots, poles, reduct, equil };
-	ui val[size(PARAMS)] = {0};
-	val[ SLOTS] = slots;
-	val[ POLES] = poles;
-	//val[ REDUCT]= NOK(slots, poles) / 6;
-	val[ COGGING] = calc_equilibrium_points( slots, poles );
-
-	printf( "\n");
-	for( ui i = 0; i < size(PARAMS); i++)
-	{
-		PARAMS[i]->print( val[i]);
-		printf( "%s\n", _(PARAMS[i]->longname) );
-	}
-	printf( "\n");
-
-	printf( "%s\n", _(SXEMA));
-	for( ui i = 0; i < slots; i++)
-		printf( "─" );
-	printf("\n");
-	char *sxema = calc_sxema( BUF, slots, poles );
-	if( sxema)
-	{
-		print_sxema( sxema, slots);
-		for( ui i = 0; i < slots; i++)
-			printf( "─" );
-		printf("\n%s", _(SCHEME_FOUND));
-		return true;
-	}
-	print_sxema( BUF, slots);
-	for( ui i = 0; i < slots; i++)
-		printf( "─" );
-	printf( "\n%s\n", _("Unbalanced"));
-	return false;
-}
-*/
-
 int usage( void)
 {
 	printf(	"\n%s\n\n%s: " APPNAME " [-h]"
@@ -888,7 +740,7 @@ int usage( void)
 	return EXIT_SUCCESS;
 }
 
-bool optproc( int opt, cchar ᚼ arg )
+bool optproc( int opt, cchar *arg )
 {
 	//printf("!!! %c, \"%s\"\n", opt, arg);
 	if( opt == 'h')
@@ -902,26 +754,16 @@ bool optproc( int opt, cchar ᚼ arg )
 	return false;
 }
 
-₠ ui hash( cchar ᚼ str )
-{
-	if( !str )
-		return 0;
-	return ui(str[0]) + (ui(str[1]) << 8);
-}
-
-//int main( int argc, cchar* argv[] )
 int main( int argc, char *const *argv )
 {
-	stdout_is_console = isatty( STDOUT_FILENO);
+	STDOUT_IS_A_TTY = isatty( STDOUT_FILENO);
 
 #ifndef __unix__
 	SetConsoleOutputCP(65001);
-	//freopen("CON", "w", stdout);
 	if( isatty( STDERR_FILENO))
 		freopen("CON", "w", stderr);
-	//freopen("CON", "r", stdin);
 
-	if( stdout_is_console )
+	if( STDOUT_IS_A_TTY )
 	{
 		hConsole = GetStdHandle( STD_OUTPUT_HANDLE);
 		GetConsoleScreenBufferInfo( hConsole, &console_screen_buffer_info );
@@ -968,9 +810,6 @@ int main( int argc, char *const *argv )
 			continue;
 		}
 	}
-
-	//if( slots_min == slots_max && poles_min == poles_max)
-	//	return ! print_1_scheme( slots_min, poles_min);
 
 	return ! find_n_print_schemes();
 }

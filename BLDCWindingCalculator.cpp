@@ -219,8 +219,8 @@ struct Param
 	cchar*	shortname;
 	cchar*	longname;
 
-virtual	void	usage_s	( void			) const	= 0;
-virtual	void	usage_l	( void			) const	= 0;
+virtual	void	usage_s	( void			) const	{ printf( "%c", opt);						}
+virtual	void	usage_l	( void			) const	{ printf("\t"); usage_s(); printf("\t%s\n", _(longname));	}
 virtual	ui	test	( ui slots, ui poles	) const	= 0;
 virtual	void	print	( ui val		) const	= 0;
 virtual	bool	load	( cchar *arg		)	= 0;
@@ -230,14 +230,47 @@ CE	Param		( char _opt, cchar *_shortname, cchar *_longname)
 };
 
 //--------------------------------------------------------------------------------------------------------------
+struct Param_balans: Param
+{
+CE	Param_balans( void): Param( 'b', "баланс", "сбалансирован(ли) статор (чётность кол. пазов)"), sel(any) {}
+
+enum	Sel						{ any = 0, yes = 1, no = 2				};
+	Sel	sel;
+virtual	void	usage_s	( void			) cØnst	{ printf( "%c[yes|no|any]", opt);			}
+virtual	ui	test	( ui slots, ui poles	) cØnst { ui r = slots%2 + 1; return !sel || sel == r ? r : 0;	}
+virtual	void	print	( ui val		) cØnst	{ static cchar *c[]={"","НЕ"}; printf("%s\t", c[val-1]);}
+virtual	bool	load	( cchar *arg		) Ø
+	{
+		switch( arg[0])
+		{
+		case  0 :
+		case '+':
+		case ' ':
+		case 'y': sel = yes;	return true;
+
+		case '-':
+		case 'n': sel = no;	return true;
+
+		case 'a':
+		case 'x': sel = any;	return true;
+		default:		return false;
+		}
+		assert( false);
+		return false;
+	}
+} par_balans;
+
+//--------------------------------------------------------------------------------------------------------------
 struct Param_range: Param
 {
+CE	Param_range	( char opt, cchar *shortname, cchar *longname, ui _min, ui _max)
+	: Param( opt, shortname, longname), min(_min), max(_max) {}
+
 	ui	min;
 	ui	max;
 CE	ui	minmax	( ui val	) const	{ return (min <= val && val <= max) ? val : 0;			}
 
-virtual	void	usage_s	( void		) cØnst	{ printf( " [%c<%s>]", opt, _("range"));			}
-virtual	void	usage_l	( void		) cØnst	{ printf( "\t%c<%s>\t%s\n", opt, _("range"), _(longname));	}
+virtual	void	usage_s	( void		) cØnst	{ printf( "%c<%s>", opt, _("range"));				}
 virtual	void	print	( ui val	) cØnst	{ printf( "%u\t", val);						}
 virtual	bool	load	( cchar *arg	) Ø
 	{
@@ -250,14 +283,14 @@ virtual	bool	load	( cchar *arg	) Ø
 		assert( false);
 		return false;
 	}
-
-CE	Param_range	( char opt, cchar *shortname, cchar *longname, ui _min, ui _max)
-	: Param( opt, shortname, longname), min(_min), max(_max) {}
 };
 
 //--------------------------------------------------------------------------------------------------------------
 struct Param_range_step: Param_range
 {
+CE	Param_range_step( char opt, cchar *shortname, cchar *longname, ui min, ui max, ui _step)
+	: Param_range( opt, shortname, longname, min, max), step(_step) {}
+
 	ui	step;
 virtual	bool	load	( cchar *arg	)
 	{
@@ -273,20 +306,19 @@ virtual	bool	load	( cchar *arg	)
 
 		return true;
 	}
-CE	Param_range_step( char opt, cchar *shortname, cchar *longname, ui min, ui max, ui _step)
-	: Param_range( opt, shortname, longname, min, max), step(_step) {}
 };
 
 //--------------------------------------------------------------------------------------------------------------
 struct Param_poles		final: Param_range_step
 {
-virtual	ui	test	( ui slots, ui poles	) cØnst	{ return poles; }
 CE	Param_poles	( void			): Param_range_step( 'p', "poles", "magnet poles", 2, 100, 2) {}
+virtual	ui	test	( ui slots, ui poles	) cØnst	{ return poles; }
 } par_poles;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Param_slots		final: Param_range_step
 {
+CE	Param_slots	( void			)	: Param_range_step( 's', "slots", "slots in the stator", 3, 99, 3) {}
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return slots; }
 virtual	bool	load	( cchar *arg		) Ø
 	{
@@ -301,26 +333,28 @@ virtual	bool	load	( cchar *arg		) Ø
 
 		return true;
 	}
-CE	Param_slots	( void			)	: Param_range_step( 's', "slots", "slots in the stator", 3, 99, 3) {}
 } par_slots;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Param_cogging		final: Param_range
 {
-virtual	ui	test	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles));	}
 CE	Param_cogging	( void			)	: Param_range( 'c', "cogging", "cogging steps", 0, -1) {}
+virtual	ui	test	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles));	}
 } par_cogging;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Param_reduction		final: Param_range
 {
-virtual	ui	test	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles)/6);	}
 CE	Param_reduction	( void			)	: Param_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0, -1) {}
+virtual	ui	test	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles)/6);	}
 } par_reduct;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Print_config: Param
 {
+CE	Print_config	( char opt, cchar *shortname, cchar *longname): Param( opt, shortname, longname) {}
+CE	Print_config	( void			)	: Param( 0, "config", "configuration") {}
+
 STATIC	auto	half = (sizeof(ui)*8 / 2);
 STATIC	ui	pack	( ui slots, ui poles	)	{ return (slots << half) + poles;		}
 STATIC	ui	slots	( ui val		)	{ return val >> half;				}
@@ -331,17 +365,15 @@ virtual	void	usage_l	( void			) cØnst	{						}
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return pack( slots, poles);			}
 virtual	void	print	( ui val		) cØnst	{ printf( "%u/%u\t", slots(val), poles(val) );	}
 virtual	bool	load	( cchar *arg		) Ø	{ return false;					}
-
-CE	Print_config	( char opt, cchar *shortname, cchar *longname): Param( opt, shortname, longname) {}
-CE	Print_config	( void			)	: Param( 0, "config", "configuration") {}
 } print_config;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Param_q			final: Print_config
 {
+CE	Param_q		( void			)	: Print_config( 'q', "s/3p", "slots / poles / phases"), sample(0) {}
+
 	ui	sample;
-virtual	void	usage_s	( void			) cØnst	{ printf( " [%c<%s>]", opt, _("fraction"));			}
-virtual	void	usage_l	( void			) cØnst	{ printf( "\t%c<%s>\t%s\n", opt, _("fraction"), _(longname));	}
+virtual	void	usage_s	( void			) cØnst	{ printf( "%c<%s>", opt, _("fraction"));			}
 virtual	ui	test	( ui slots, ui poles	) cØnst
 	{
 		slots /= 3;
@@ -368,13 +400,13 @@ virtual	bool	load	( cchar *arg		) Ø
 		sample = pack( numerator/nod, denominator/nod );
 		return true;
 	}
-
-CE	Param_q		( void			)	: Print_config( 'q', "q", "slots per pole per phase"), sample(0) {}
 } par_q;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Param_winding_factor	final: Param_range
 {
+CE	Param_winding_factor( void		)	: Param_range( 'w', "WF", "winding factor", 0, scale) {}
+
 STATIC	ui	nuls	= 6;
 STATIC	ui	scale	= pow10( nuls);
 STATIC	ui	toscale	( double x		)	{ return ui((x + .5/scale) * scale); }
@@ -436,13 +468,12 @@ virtual	bool	load	( cchar *arg		) Ø
 		assert( false);
 		return false;
 	}
-
-CE	Param_winding_factor( void		)	: Param_range( 'w', "WF", "winding factor", 0, scale) {}
 } par_winding_factor;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Print_sxema		final: Print_config
 {
+CE	Print_sxema	( void			)	: Print_config( 0, "winding scheme", "winding scheme") {}
 STATIC	bool	test0	( ui slots, ui poles	)	{ return (poles / НОД( slots/3, poles)) % 3;		}
 STATIC	bool	test1	( ui slots, ui poles	)
 	{
@@ -563,7 +594,6 @@ virtual	void	print	( ui val		) cØnst
 		SetConsoleTextAttribute( hConsole, console_screen_buffer_info.wAttributes);
 #endif
 	}
-CE	Print_sxema	( void			)	: Print_config( 0, "winding scheme", "winding scheme") {}
 } print_sxema;
 #if DIV( тесты алгоритма поиска схемы намотки )
 STATIC_ASSERT( Print_sxema::test2( 24, 18) );
@@ -580,6 +610,7 @@ STATIC_ASSERT( Print_sxema::test2( 60, 22) );
 Param *PARAMS[] = // массив всех параметров
 { &par_slots
 , &par_poles
+, &par_balans
 //, &print_config
 , &par_q
 , &par_winding_factor
@@ -737,8 +768,12 @@ int usage( void)
 	printf(	"\n%s\n\n%s: " APPNAME " [-h]"
 	      , _("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)")
 	      , _("Usage")										);
-	for( ui i = 0; i < size(PARAMS); i++)
+	for( ui i = 0; i < size(PARAMS)-1; i++)
+	{
+		printf(" [");
 		PARAMS[i]->usage_s();
+		printf("]");
+	}
 	printf(	"\n%s:\n", _("Parameters")								);
 	printf(	"\t-h\t\t%s\n", _("display this help and exit")						);
 	for( ui i = 0; i < size(PARAMS); i++)
@@ -801,6 +836,9 @@ int main( int argc, char *const *argv )
 		if( '\0' == arg[0] )
 			continue; // что делать с отдельным '-' не знаю... Пока ничего
 
+		if( !optproc( arg[0], &arg[1]) )
+			fprintf( stderr, "%s: %s\n", arg, _("Wrong parameter"));
+		/*
 		if( arg[1] )
 		{
 			if( !optproc( arg[0], &arg[1]) )
@@ -816,12 +854,14 @@ int main( int argc, char *const *argv )
 		}
 		else
 		{
+			//fprintf( stderr, "!3 '%c'%c'\n", arg[0], *argv[i+1]);
 			if( !optproc( arg[0], argv[i+1]) )
 				fprintf( stderr, "%c: %s\n", arg[0], _("Wrong parameter"));
 			else
 				i++;
 			continue;
 		}
+		*/
 	}
 
 	return ! find_n_print_schemes();

@@ -56,10 +56,10 @@ msgid "Wrong parameter"
 msgstr "Неверный параметр"
 
 msgid "cogging"
-msgstr "залипов"
+msgstr "рывки"
 
 msgid "cogging steps"
-msgstr "точек залипания"
+msgstr "рывков вращения"
 
 msgid "config"
 msgstr "конфиг"
@@ -88,8 +88,8 @@ msgstr "магнитных полюсов ротора"
 msgid "poles"
 msgstr "полюсов"
 
-msgid "q"
-msgstr "q"
+msgid "s/3p"
+msgstr "s/3p"
 
 msgid "range"
 msgstr "диапазон"
@@ -104,8 +104,8 @@ msgstr "пазов"
 msgid "slots in the stator"
 msgstr "пазов (полюсов) статора"
 
-msgid "slots per pole per phase"
-msgstr "базовое соотношение"
+msgid "slots / poles / phases"
+msgstr "базовое соотношение s/3p"
 
 msgid "winding factor"
 msgstr "коэффициент намотки"

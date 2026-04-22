@@ -432,8 +432,8 @@ CE	Param_winding_factor( void		)	: Param_range( 'w', "WF", "winding factor", 0, 
 
 struct Print_sxema		final: Print_config
 {
-STATIC	bool	test1	( ui slots, ui poles	)	{ return (poles / НОД( slots/3, poles)) % 3;		}
-STATIC	bool	test2	( ui slots, ui poles	)
+STATIC	bool	test	( ui slots, ui poles	)	{ return (poles / НОД( slots/3, poles)) % 3;		}
+STATIC	bool	test1	( ui slots, ui poles	)
 	{
 		if( slots == poles )
 			return false;
@@ -459,9 +459,10 @@ STATIC	bool	test2	( ui slots, ui poles	)
 			α += ρ;
 		}
 
-		return (a == b && a == c && A == B && A == C) == test1( slots, poles);
+		return (a == b && a == c && A == B && A == C);
 	}
-virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return test1(slots, poles) ? pack(slots, poles) : 0;	}
+STATIC	bool	test2	( ui slots, ui poles	)	{ return test( slots, poles) == test1( slots, poles);	}
+virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return test(slots, poles) ? pack(slots, poles) : 0;	}
 virtual	void	print	( ui val		) cØnst
 	{
 		ui slots = Print_config::slots(val);

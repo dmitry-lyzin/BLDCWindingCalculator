@@ -1,12 +1,3 @@
-#define STATIC_ASSERT(exp) static_assert( exp, #exp " FAIL!" );
-#define group(x) true
-#define ˂	template< class
-#define ˂˃	template<>
-#define cØnst	const override
-#define Ø	override
-#define STATIC	constexpr static
-#define CE	constexpr
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -17,11 +8,21 @@
 #define _INTL_NO_DEFINE_MACRO_FPRINTF 1
 #include <libintl.h>
 
+#define STATIC_ASSERT(exp) static_assert( exp, #exp " FAIL!" );
+#define DIV(x)	true
+#define ˂	template< class
+#define ˂˃	template<>
+#define cØnst	const override
+#define Ø	override
+#define STATIC	constexpr static
+#define CE	constexpr
+
 using ui	= unsigned int;
 using ulong	= unsigned long;
 using ulonglong	= unsigned long long;
 using angle	= unsigned long long;
 using cchar	= const char;
+using Complex	= std::complex< double>;
 using std::swap;
 using std::size;
 using std::string_view;
@@ -32,6 +33,8 @@ using std::string_view;
 #else
 #	include <windows.h>
 #	include <io.h>
+#	undef min
+#	undef max
 #	define STDIN_FILENO 0
 #	define STDOUT_FILENO 1
 #	define STDERR_FILENO 2
@@ -90,7 +93,7 @@ CE angle operator ""⁰ ( unsigned long long degree )
 	ui_degree %= 180u;
 	return ret + div_mul( _180⁰, 180u, ui_degree);
 }
-#if group( тесты для углов )
+#if DIV( тесты для углов )
 STATIC_ASSERT( 180⁰/180	==   1⁰ );
 STATIC_ASSERT(  90⁰/3	==  30⁰ );
 STATIC_ASSERT( 300⁰/5	==  60⁰ );
@@ -102,7 +105,7 @@ STATIC_ASSERT( div_mul(333⁰, 3, 2) == 222⁰ );
 // очень маленький угол
 CE angle ε⁰ = 32*4;
 
-#if group( перегрузки для преобразований число <-> строка )
+#if DIV( перегрузки для преобразований число <-> строка )
 int fprint( FILE *stream, int		x ) { return fprintf( stream, "%d",	x ); }
 int fprint( FILE *stream, ui		x ) { return fprintf( stream, "%u",	x ); }
 int fprint( FILE *stream, long		x ) { return fprintf( stream, "%ld",	x ); }
@@ -208,6 +211,7 @@ ui num_sign_num1( cchar *str, cchar sign, long *x1, long *x2 )
 	return str_to_num1( str, x1);
 }
 
+//--------------------------------------------------------------------------------------------------------------
 struct Param
 {
 	bool	column;
@@ -217,7 +221,7 @@ struct Param
 
 virtual	void	usage_s	( void			) const	= 0;
 virtual	void	usage_l	( void			) const	= 0;
-virtual	ui	calc	( ui slots, ui poles	) const	= 0;
+virtual	ui	test	( ui slots, ui poles	) const	= 0;
 virtual	void	print	( ui val		) const	= 0;
 virtual	bool	load	( cchar *arg		)	= 0;
 
@@ -225,10 +229,9 @@ CE	Param		( char _opt, cchar *_shortname, cchar *_longname)
 	: column(false), opt(_opt), shortname(_shortname), longname(_longname) {}
 };
 
+//--------------------------------------------------------------------------------------------------------------
 struct Param_range: Param
 {
-#undef min
-#undef max
 	ui	min;
 	ui	max;
 CE	ui	minmax	( ui val	) const	{ return (min <= val && val <= max) ? val : 0;			}
@@ -252,6 +255,7 @@ CE	Param_range	( char opt, cchar *shortname, cchar *longname, ui _min, ui _max)
 	: Param( opt, shortname, longname), min(_min), max(_max) {}
 };
 
+//--------------------------------------------------------------------------------------------------------------
 struct Param_range_step: Param_range
 {
 	ui	step;
@@ -273,15 +277,17 @@ CE	Param_range_step( char opt, cchar *shortname, cchar *longname, ui min, ui max
 	: Param_range( opt, shortname, longname, min, max), step(_step) {}
 };
 
+//--------------------------------------------------------------------------------------------------------------
 struct Param_poles		final: Param_range_step
 {
-virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return poles; }
+virtual	ui	test	( ui slots, ui poles	) cØnst	{ return poles; }
 CE	Param_poles	( void			): Param_range_step( 'p', "poles", "magnet poles", 2, 100, 2) {}
 } par_poles;
 
+//--------------------------------------------------------------------------------------------------------------
 struct Param_slots		final: Param_range_step
 {
-virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return slots; }
+virtual	ui	test	( ui slots, ui poles	) cØnst	{ return slots; }
 virtual	bool	load	( cchar *arg		) Ø
 	{
 		if( !Param_range_step::load( arg))
@@ -298,18 +304,21 @@ virtual	bool	load	( cchar *arg		) Ø
 CE	Param_slots	( void			)	: Param_range_step( 's', "slots", "slots in the stator", 3, 99, 3) {}
 } par_slots;
 
-struct Param_NOK		final: Param_range
+//--------------------------------------------------------------------------------------------------------------
+struct Param_cogging		final: Param_range
 {
-virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles));	}
-CE	Param_NOK	( void			)	: Param_range( 'c', "cogging", "cogging steps", 0, -1) {}
-} par_NOK;
+virtual	ui	test	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles));	}
+CE	Param_cogging	( void			)	: Param_range( 'c', "cogging", "cogging steps", 0, -1) {}
+} par_cogging;
 
+//--------------------------------------------------------------------------------------------------------------
 struct Param_reduction		final: Param_range
 {
-virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles)/6);	}
+virtual	ui	test	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles)/6);	}
 CE	Param_reduction	( void			)	: Param_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0, -1) {}
 } par_reduct;
 
+//--------------------------------------------------------------------------------------------------------------
 struct Print_config: Param
 {
 STATIC	auto	half = (sizeof(ui)*8 / 2);
@@ -319,7 +328,7 @@ STATIC	ui	poles	( ui val		)	{ return val & ~(ui(-1) << half);		}
 
 virtual	void	usage_s	( void			) cØnst	{						}
 virtual	void	usage_l	( void			) cØnst	{						}
-virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return pack( slots, poles);			}
+virtual	ui	test	( ui slots, ui poles	) cØnst	{ return pack( slots, poles);			}
 virtual	void	print	( ui val		) cØnst	{ printf( "%u/%u\t", slots(val), poles(val) );	}
 virtual	bool	load	( cchar *arg		) Ø	{ return false;					}
 
@@ -327,12 +336,13 @@ CE	Print_config	( char opt, cchar *shortname, cchar *longname): Param( opt, shor
 CE	Print_config	( void			)	: Param( 0, "config", "configuration") {}
 } print_config;
 
+//--------------------------------------------------------------------------------------------------------------
 struct Param_q			final: Print_config
 {
 	ui	sample;
 virtual	void	usage_s	( void			) cØnst	{ printf( " [%c<%s>]", opt, _("fraction"));			}
 virtual	void	usage_l	( void			) cØnst	{ printf( "\t%c<%s>\t%s\n", opt, _("fraction"), _(longname));	}
-virtual	ui	calc	( ui slots, ui poles	) cØnst
+virtual	ui	test	( ui slots, ui poles	) cØnst
 	{
 		slots /= 3;
 		ui nod = НОД( slots, poles);
@@ -362,21 +372,21 @@ virtual	bool	load	( cchar *arg		) Ø
 CE	Param_q		( void			)	: Print_config( 'q', "q", "slots per pole per phase"), sample(0) {}
 } par_q;
 
+//--------------------------------------------------------------------------------------------------------------
 struct Param_winding_factor	final: Param_range
 {
 STATIC	ui	nuls	= 6;
 STATIC	ui	scale	= pow10( nuls);
 STATIC	ui	toscale	( double x		)	{ return ui((x + .5/scale) * scale); }
 
-virtual	ui	calc	( ui slots, ui poles	) cØnst
+virtual	ui	test	( ui slots, ui poles	) cØnst
 	{
-		using namespace std;
-		complex<double> res = 0;
+		Complex	res = 0;
 
-		complex<double>	ȓ = polar( 1., M_PI / slots * poles );
-		angle		ρ = div_mul( 180⁰, slots, poles);
-		complex<double>	â = ȓ;
-		angle		α = 30⁰ + ρ + ε⁰;
+		Complex	ȓ = std::polar( 1., M_PI / slots * poles );
+		angle	ρ = div_mul( 180⁰, slots, poles);
+		Complex	â = ȓ;
+		angle	α = 30⁰ + ρ + ε⁰;
 
 		int EMF = 0;
 		int previous_EMF = 2; // при i == 0 EMF равнялся бы 2
@@ -430,9 +440,10 @@ virtual	bool	load	( cchar *arg		) Ø
 CE	Param_winding_factor( void		)	: Param_range( 'w', "WF", "winding factor", 0, scale) {}
 } par_winding_factor;
 
+//--------------------------------------------------------------------------------------------------------------
 struct Print_sxema		final: Print_config
 {
-STATIC	bool	test	( ui slots, ui poles	)	{ return (poles / НОД( slots/3, poles)) % 3;		}
+STATIC	bool	test0	( ui slots, ui poles	)	{ return (poles / НОД( slots/3, poles)) % 3;		}
 STATIC	bool	test1	( ui slots, ui poles	)
 	{
 		if( slots == poles )
@@ -461,8 +472,8 @@ STATIC	bool	test1	( ui slots, ui poles	)
 
 		return (a == b && a == c && A == B && A == C);
 	}
-STATIC	bool	test2	( ui slots, ui poles	)	{ return test( slots, poles) == test1( slots, poles);	}
-virtual	ui	calc	( ui slots, ui poles	) cØnst	{ return test(slots, poles) ? pack(slots, poles) : 0;	}
+STATIC	bool	test2	( ui slots, ui poles	)	{ return test0( slots, poles) == test1( slots, poles);	}
+virtual	ui	test	( ui slots, ui poles	) cØnst	{ return test0(slots, poles) ? pack(slots, poles) : 0;	}
 virtual	void	print	( ui val		) cØnst
 	{
 		ui slots = Print_config::slots(val);
@@ -554,7 +565,7 @@ virtual	void	print	( ui val		) cØnst
 	}
 CE	Print_sxema	( void			)	: Print_config( 0, "winding scheme", "winding scheme") {}
 } print_sxema;
-#if group( тесты алгоритма поиска схемы намотки )
+#if DIV( тесты алгоритма поиска схемы намотки )
 STATIC_ASSERT( Print_sxema::test2( 24, 18) );
 STATIC_ASSERT( Print_sxema::test2( 24, 20) );
 STATIC_ASSERT( Print_sxema::test2( 24, 22) );
@@ -565,13 +576,14 @@ STATIC_ASSERT( Print_sxema::test2( 24, 32) );
 STATIC_ASSERT( Print_sxema::test2( 60, 22) );
 #endif
 
-Param *PARAMS[] = // все параметры
+//--------------------------------------------------------------------------------------------------------------
+Param *PARAMS[] = // массив всех параметров
 { &par_slots
 , &par_poles
 //, &print_config
 , &par_q
 , &par_winding_factor
-, &par_NOK
+, &par_cogging
 , &print_sxema
 };
 enum { slots_col = 0 };
@@ -635,7 +647,7 @@ int find_n_print_schemes( void )
 		{
 			for( ui i = 0; i < size(PARAMS); i++)
 			{
-				if( ! (val[i] = PARAMS[i]->calc( slots, poles)) )
+				if( ! (val[i] = PARAMS[i]->test( slots, poles)) )
 					goto label1;
 			}
 
@@ -698,7 +710,7 @@ int find_n_print_schemes( void )
 		{
 			for( ui i = 0; i < size(PARAMS); i++)
 			{
-				if( ! (val[i] = PARAMS[i]->calc( slots, poles)) )
+				if( ! (val[i] = PARAMS[i]->test( slots, poles)) )
 					goto label2;
 			}
 

@@ -55,6 +55,9 @@ msgstr "Где"
 msgid "Wrong parameter"
 msgstr "Неверный параметр"
 
+msgid "balanc"
+msgstr "баланс"
+
 msgid "cogging"
 msgstr "рывки"
 
@@ -85,11 +88,14 @@ msgstr ""
 msgid "magnet poles"
 msgstr "магнитных полюсов ротора"
 
+msgid "not"
+msgstr "не"
+
 msgid "poles"
 msgstr "полюсов"
 
-msgid "s/3p"
-msgstr "s/3p"
+msgid "q = slots/poles/phases"
+msgstr "число пазов на полюс и фазу q = s/3p"
 
 msgid "range"
 msgstr "диапазон"
@@ -98,14 +104,17 @@ msgid "reduction (ƒ/ν)"
 msgstr ""
 "магнитная редукция (ƒ/ν, Гц/сˉ¹) - отношение частот электрической/вращения"
 
+msgid "s/3p"
+msgstr "s/3p"
+
 msgid "slots"
 msgstr "пазов"
 
 msgid "slots in the stator"
 msgstr "пазов (полюсов) статора"
 
-msgid "slots / poles / phases"
-msgstr "базовое соотношение s/3p"
+msgid "stator balance"
+msgstr "сбалансированность статора"
 
 msgid "winding factor"
 msgstr "коэффициент намотки"

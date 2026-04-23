@@ -214,6 +214,9 @@ ui num_sign_num1( cchar *str, cchar sign, long *x1, long *x2 )
 //--------------------------------------------------------------------------------------------------------------
 struct Param
 {
+CE	Param		( char _opt, cchar *_shortname, cchar *_longname)
+	: column(false), opt(_opt), shortname(_shortname), longname(_longname) {}
+
 	bool	column;
 	char	opt;
 	cchar*	shortname;
@@ -224,21 +227,18 @@ virtual	void	usage_l	( void			) const	{ printf("\t"); usage_s(); printf("\t%s\n"
 virtual	ui	test	( ui slots, ui poles	) const	= 0;
 virtual	void	print	( ui val		) const	= 0;
 virtual	bool	load	( cchar *arg		)	= 0;
-
-CE	Param		( char _opt, cchar *_shortname, cchar *_longname)
-	: column(false), opt(_opt), shortname(_shortname), longname(_longname) {}
 };
 
 //--------------------------------------------------------------------------------------------------------------
 struct Param_balans: Param
 {
-CE	Param_balans( void): Param( 'b', "баланс", "сбалансирован(ли) статор (чётность кол. пазов)"), sel(any) {}
-
 enum	Sel						{ any = 0, yes = 1, no = 2				};
+CE	Param_balans	( void			): Param( 'b', "balanc", "stator balance"), sel(any) {}
+
 	Sel	sel;
-virtual	void	usage_s	( void			) cØnst	{ printf( "%c[yes|no|any]", opt);			}
+virtual	void	usage_s	( void			) cØnst	{ printf( "%c[+|-|any]", opt);			}
 virtual	ui	test	( ui slots, ui poles	) cØnst { ui r = slots%2 + 1; return !sel || sel == r ? r : 0;	}
-virtual	void	print	( ui val		) cØnst	{ static cchar *c[]={"","НЕ"}; printf("%s\t", c[val-1]);}
+virtual	void	print	( ui val		) cØnst	{ static cchar *c[]={"+","-"}; printf("%s", c[val-1]);	}
 virtual	bool	load	( cchar *arg		) Ø
 	{
 		switch( arg[0])
@@ -271,7 +271,7 @@ CE	Param_range	( char opt, cchar *shortname, cchar *longname, ui _min, ui _max)
 CE	ui	minmax	( ui val	) const	{ return (min <= val && val <= max) ? val : 0;			}
 
 virtual	void	usage_s	( void		) cØnst	{ printf( "%c<%s>", opt, _("range"));				}
-virtual	void	print	( ui val	) cØnst	{ printf( "%u\t", val);						}
+virtual	void	print	( ui val	) cØnst	{ printf( "%u", val);						}
 virtual	bool	load	( cchar *arg	) Ø
 	{
 		switch( num_sign_num( arg, '-', &min, &max))
@@ -360,17 +360,15 @@ STATIC	ui	pack	( ui slots, ui poles	)	{ return (slots << half) + poles;		}
 STATIC	ui	slots	( ui val		)	{ return val >> half;				}
 STATIC	ui	poles	( ui val		)	{ return val & ~(ui(-1) << half);		}
 
-virtual	void	usage_s	( void			) cØnst	{						}
-virtual	void	usage_l	( void			) cØnst	{						}
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return pack( slots, poles);			}
-virtual	void	print	( ui val		) cØnst	{ printf( "%u/%u\t", slots(val), poles(val) );	}
+virtual	void	print	( ui val		) cØnst	{ printf( "%u/%u", slots(val), poles(val) );	}
 virtual	bool	load	( cchar *arg		) Ø	{ return false;					}
 } print_config;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Param_q			final: Print_config
 {
-CE	Param_q		( void			)	: Print_config( 'q', "s/3p", "slots / poles / phases"), sample(0) {}
+CE	Param_q		( void			)	: Print_config( 'q', "s/3p", "q = slots/poles/phases"), sample(0) {}
 
 	ui	sample;
 virtual	void	usage_s	( void			) cØnst	{ printf( "%c<%s>", opt, _("fraction"));			}
@@ -442,8 +440,8 @@ virtual	ui	test	( ui slots, ui poles	) cØnst
 	}
 virtual	void	print	( ui val		) cØnst
 	{
-		if( val < scale) printf( ".%0*d\t", nuls, val		);
-		else             printf( "%g\t", double(val) / scale	);
+		if( val < scale) printf( ".%0*d", nuls, val		);
+		else             printf( "%g", double(val) / scale	);
 	}
 virtual	bool	load	( cchar *arg		) Ø
 	{
@@ -505,6 +503,8 @@ STATIC	bool	test1	( ui slots, ui poles	)
 	}
 STATIC	bool	test2	( ui slots, ui poles	)	{ return test0( slots, poles) == test1( slots, poles);	}
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return test0(slots, poles) ? pack(slots, poles) : 0;	}
+virtual	void	usage_s	( void			) cØnst	{							}
+virtual	void	usage_l	( void			) cØnst	{							}
 virtual	void	print	( ui val		) cØnst
 	{
 		ui slots = Print_config::slots(val);
@@ -715,7 +715,7 @@ int find_n_print_schemes( void )
 		if( ! PARAMS[i]->column )
 		{
 			PARAMS[i]->print( val0[i]);
-			printf( "%s\n", _(PARAMS[i]->longname) );
+			printf( "\t%s\n", _(PARAMS[i]->longname) );
 		}
 	}
 	printf( "\n");
@@ -739,6 +739,8 @@ int find_n_print_schemes( void )
 	{
 		for( ui poles = poles_min; poles <= poles_max; poles += 2)
 		{
+			cchar *bl = "";
+
 			for( ui i = 0; i < size(PARAMS); i++)
 			{
 				if( ! (val[i] = PARAMS[i]->test( slots, poles)) )
@@ -748,7 +750,11 @@ int find_n_print_schemes( void )
 			for( ui i = 0; i < size(PARAMS); i++)
 			{
 				if( PARAMS[i]->column)
+				{
+					printf("%s", bl);
 					PARAMS[i]->print( val[i]);
+					bl = "\t";
+				}
 			}
 			printf("\n");
 			found++;

@@ -24,6 +24,9 @@ msgstr "Найдено %u схем\n"
 msgid "1 scheme found\n"
 msgstr "Найдена 1 схема\n"
 
+msgid "Example"
+msgstr "Пример"
+
 msgid "It's not a number. Used by default"
 msgstr "Это не число. Пусть будет"
 
@@ -59,10 +62,10 @@ msgid "balanc"
 msgstr "баланс"
 
 msgid "cogging"
-msgstr "рывки"
+msgstr "рывков"
 
 msgid "cogging steps"
-msgstr "рывков вращения"
+msgstr "рывков на круг"
 
 msgid "config"
 msgstr "конфиг"
@@ -72,6 +75,16 @@ msgstr "конфигурация мотора"
 
 msgid "display this help and exit"
 msgstr "выдать подсказку и сдохнуть"
+
+msgid "for a "
+msgstr ""
+
+msgid ""
+"for a 60-pole rotor, we will find all the winding options among stators with "
+"a number of slots from 3 to 80 and a winding factor greater than 0.85"
+msgstr ""
+"для ротора на 60 полюсов найдём все варианты намотки среди статоров с числом "
+"пазов от 3 до 80 и коэфициентом намотки больше 0.85"
 
 msgid "fraction"
 msgstr "дробь"
@@ -94,8 +107,11 @@ msgstr "не"
 msgid "poles"
 msgstr "полюсов"
 
+msgid "q"
+msgstr "q"
+
 msgid "q = slots/poles/phases"
-msgstr "число пазов на полюс и фазу q = s/3p"
+msgstr "q = число пазов на полюс и фазу"
 
 msgid "range"
 msgstr "диапазон"
@@ -103,9 +119,6 @@ msgstr "диапазон"
 msgid "reduction (ƒ/ν)"
 msgstr ""
 "магнитная редукция (ƒ/ν, Гц/сˉ¹) - отношение частот электрической/вращения"
-
-msgid "s/3p"
-msgstr "s/3p"
 
 msgid "slots"
 msgstr "пазов"

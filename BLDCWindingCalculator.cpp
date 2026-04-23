@@ -117,13 +117,29 @@ int fprint( FILE *stream, double	x ) { return fprintf( stream, "%g",	x ); }
 
 ˂ Num> Num	strto			  (cchar *str, cchar **end) { return 0;	STATIC_ASSERT( false		); }
 ˂˃ int		strto< int		> (cchar *str, cchar **end) { return strtol	(str, (char **)end, 0	); }
-˂˃ ui		strto< ui		> (cchar *str, cchar **end) { return strtoul	(str, (char **)end, 0	); }
+//˂˃ ui		strto< ui		> (cchar *str, cchar **end) { return strtoul	(str, (char **)end, 0	); }
 ˂˃ long		strto< long		> (cchar *str, cchar **end) { return strtol	(str, (char **)end, 0	); }
 ˂˃ long long	strto< long long	> (cchar *str, cchar **end) { return strtoll	(str, (char **)end, 0	); }
 ˂˃ ulong	strto< ulong		> (cchar *str, cchar **end) { return strtoul	(str, (char **)end, 0	); }
 ˂˃ ulonglong	strto< ulonglong	> (cchar *str, cchar **end) { return strtoull	(str, (char **)end, 0	); }
 ˂˃ float	strto< float		> (cchar *str, cchar **end) { return strtof	(str, (char **)end	); }
 ˂˃ double	strto< double		> (cchar *str, cchar **end) { return strtod	(str, (char **)end	); }
+˂˃ CE ui	strto< ui		> (cchar *str, cchar **end)
+{
+	ui res = 0;
+	while( '0' <= *str && *str <= '9' )
+		res = res * 10 + (*str++ - '0');
+
+	if( end )
+		*end = str;
+	return res;
+}
+
+// превратить строку в число (constexpr)
+CE inline ui N( cchar *str) { return strto<ui>( str, nullptr); }
+
+STATIC_ASSERT( N("123"	) == 123	);
+STATIC_ASSERT( N("4321"	) == 4321	);
 #endif
 
 ˂ num> bool str_to_num( cchar *str, num *x)
@@ -368,7 +384,7 @@ virtual	bool	load	( cchar *arg		) Ø	{ return false;					}
 //--------------------------------------------------------------------------------------------------------------
 struct Param_q			final: Print_config
 {
-CE	Param_q		( void			)	: Print_config( 'q', "s/3p", "q = slots/poles/phases"), sample(0) {}
+CE	Param_q		( void			)	: Print_config( 'q', "q", "q = slots/poles/phases"), sample(0) {}
 
 	ui	sample;
 virtual	void	usage_s	( void			) cØnst	{ printf( "%c<%s>", opt, _("fraction"));			}
@@ -780,16 +796,35 @@ int usage( void)
 		PARAMS[i]->usage_s();
 		printf("]");
 	}
-	printf(	"\n%s:\n", _("Parameters")								);
+	printf(	"\n\n%s:\n", _("Parameters")								);
 	printf(	"\t-h\t\t%s\n", _("display this help and exit")						);
 	for( ui i = 0; i < size(PARAMS); i++)
 		PARAMS[i]->usage_l();
 
-	printf( "\n%s:\n\t<%s>  \t", _("Where"), _("range")						);
-	marginprint( 0, 24, 72-24, _(
+	printf( "%s:\n\t<%s>  \t", _("Where"), _("range")						);
+	marginprint( 0, 24, 79-24, _(
 		"is the pair of numbers separated by a '-' sign. In this pair, the first or second "
 		"or even both numbers can be omitted (one '-' remains) or one number can be specified "
 		"(there will be a range of one number)")						);
+	printf( "%s:\n", _("Example")									);
+
+#define	EX_slots "80"
+#define	EX_poles "60"
+#define	EX_wf    "85" //%
+
+	marginprint( 8, 8, 79-8, _(
+		"for a " EX_poles "-pole rotor, we will find all the winding options among stators with "
+		"a number of slots from 3 to " EX_slots " and a winding factor greater than 0." EX_wf)	);
+	printf( "\n\t" APPNAME " p" EX_poles " s-" EX_slots " w." EX_wf "-\n"				);
+
+	par_slots.min = 3;
+	par_slots.max = N( EX_slots);
+	par_poles.min = N( EX_poles);
+	par_poles.max = par_poles.min;
+	par_winding_factor.min = N( EX_wf) * 10000;
+	//par_balans.sel = Param_balans::yes;
+
+	find_n_print_schemes();
 
 	return EXIT_SUCCESS;
 }

@@ -872,7 +872,13 @@ int main( int argc, char *const *argv )
 {
 	STDOUT_IS_A_TTY = isatty( STDOUT_FILENO);
 
-#ifndef __unix__
+#ifdef __unix__
+	cchar *locale = LOCALE;
+#else
+	cchar *p = strrchr( argv[0], '\\');
+	assert(p);
+	cchar *locale = mkstr( B(1024), "%.*s\\locale", int(p - argv[0]), argv[0]);
+
 	SetConsoleOutputCP(65001);
 	if( isatty( STDERR_FILENO))
 		freopen("CON", "w", stderr);
@@ -885,7 +891,7 @@ int main( int argc, char *const *argv )
 	}
 #endif
 	if( ! setlocale		(LC_MESSAGES, "")) perror("setlocale(): "); // может LC_ALL ? Нет, десятичная запятая - зло!
-	bindtextdomain		(APPNAME, LOCALE);
+	bindtextdomain		(APPNAME, locale);
 	bind_textdomain_codeset	(APPNAME,"UTF-8");
 	textdomain		(APPNAME	);
 

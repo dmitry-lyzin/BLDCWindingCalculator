@@ -807,16 +807,16 @@ int usage( void)
 		"(there will be a range of one number)")						);
 	printf( "%s:\n", _("Example")									);
 	marginprint( 8, 8, 79-8, _(
-		"for a 60-pole rotor, we will find all the winding options among stators with "
-		"a number of slots from 3 to 80 and a winding factor greater than 0.85")		);
-	printf( "\n\t" APPNAME " p60 s-80 w.85-\n"							);
+		"For a 46-pole rotor, we will find all the winding options among balanced stators "
+		"with a number of slots from 3 to 45 and a winding factor of more than 0.6")		);
+	printf( "\t>>> " APPNAME " p46 b+ s3-45 w0.6-\n"						);
 
 	par_slots.min = 3;
-	par_slots.max = 80;
-	par_poles.min = 60;
+	par_slots.max = 45;
+	par_poles.min = 46;
 	par_poles.max = par_poles.min;
-	par_winding_factor.min = 850000;
-	//par_balans.sel = Param_balans::yes;
+	par_winding_factor.min = 600000;
+	par_balans.sel = Param_balans::yes;
 
 	find_n_print_schemes();
 

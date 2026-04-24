@@ -271,8 +271,8 @@ CE	Param		( char _opt, cchar *_shortname, cchar *_longname)
 	cchar*	shortname;
 	cchar*	longname;
 
-virtual	void	usage_l	( void			) const	{ printf("\t%s\t%s\n", usage_s(B(64)), _(longname));	}
 virtual	cchar*	usage_s	( char *buf, ui size	) const	{ return mkstr( buf, size, "%c", opt);			}
+virtual	void	usage_l	( void			) const	{ printf("\t%s\t%s\n", usage_s(B(64)), _(longname));	}
 virtual	ui	test	( ui slots, ui poles	) const	= 0;
 virtual	void	print	( ui val		) const	= 0;
 virtual	bool	load	( cchar *arg		)	= 0;
@@ -817,9 +817,9 @@ int find_n_print_schemes( void )
 
 int usage( void)
 {
-	printf(	"\n%s\n\n%s:\n",
-		_("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)"),
-		_("Usage")										);
+	printf(	"\n%s\n\n%s:\n"
+	      , _("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)")
+	      , _("Usage")										);
 	int n = 79 - printf( "        " APPNAME " [-h]");
 	for( ui i = 0; i < size(PARAMS)-1; i++)
 	{

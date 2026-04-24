@@ -2,14 +2,26 @@
 #include <string.h>
 #include <assert.h>
 #include <inttypes.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#define _INTL_NO_DEFINE_MACRO_FPRINTF	1
+#define _INTL_NO_DEFINE_MACRO_VFPRINTF	1
+#define _INTL_NO_DEFINE_MACRO_PRINTF	1
+#define _INTL_NO_DEFINE_MACRO_VPRINTF	1
+#define _INTL_NO_DEFINE_MACRO_SPRINTF	1
+#define _INTL_NO_DEFINE_MACRO_VSPRINTF	1
+#define _INTL_NO_DEFINE_MACRO_SNPRINTF	1
+#define _INTL_NO_DEFINE_MACRO_VSNPRINTF	1
+#define _INTL_NO_DEFINE_MACRO_ASPRINTF	1
+#define _INTL_NO_DEFINE_MACRO_VASPRINTF	1
+#include <libintl.h>
 #define _USE_MATH_DEFINES
 #include <complex>
-#define _INTL_NO_DEFINE_MACRO_PRINTF 1
-#define _INTL_NO_DEFINE_MACRO_FPRINTF 1
-#include <libintl.h>
+#include <array>
 
 #define STATIC_ASSERT(exp) static_assert( exp, #exp " FAIL!" );
 #define DIV(x)	true
+#define B(size)	(array< char, (size)>().data()), (size)
 #define ˂	template< class
 #define ˂˃	template<>
 #define cØnst	const override
@@ -26,6 +38,7 @@ using Complex	= std::complex< double>;
 using std::swap;
 using std::size;
 using std::string_view;
+using std::array;
 
 #ifdef __unix__
 #	include <unistd.h>
@@ -105,15 +118,38 @@ STATIC_ASSERT( div_mul(333⁰, 3, 2) == 222⁰ );
 // очень маленький угол
 CE angle ε⁰ = 32*4;
 
+cchar *mkstr( char *buf, ui size, cchar *fmt, ...)
+{
+	va_list ap;
+	va_start( ap, fmt);
+	int n = vsnprintf( buf, size, fmt, ap);
+	va_end( ap);
+	assert( n > -1 && n < size);
+	return buf;
+}
+
+template< ui SIZE>
+cchar *mkstr( char (&buf)[SIZE], cchar *fmt, ...)
+{
+	va_list ap;
+	va_start( ap, fmt);
+	int n = vsnprintf( buf, SIZE, fmt, ap);
+	va_end( ap);
+	assert( n > -1 && n < SIZE);
+	return buf;
+}
+
 #if DIV( перегрузки для преобразований число <-> строка )
-int fprint( FILE *stream, int		x ) { return fprintf( stream, "%d",	x ); }
-int fprint( FILE *stream, ui		x ) { return fprintf( stream, "%u",	x ); }
-int fprint( FILE *stream, long		x ) { return fprintf( stream, "%ld",	x ); }
-int fprint( FILE *stream, long long	x ) { return fprintf( stream, "%lld",	x ); }
-int fprint( FILE *stream, ulong		x ) { return fprintf( stream, "%lu",	x ); }
-int fprint( FILE *stream, ulonglong	x ) { return fprintf( stream, "%llu",	x ); }
-int fprint( FILE *stream, float		x ) { return fprintf( stream, "%g",	x ); }
-int fprint( FILE *stream, double	x ) { return fprintf( stream, "%g",	x ); }
+cchar *strfrom( char *buf, ui size, int		x ) { return mkstr( buf, size, "%d",	x ); }
+cchar *strfrom( char *buf, ui size, ui		x ) { return mkstr( buf, size, "%u",	x ); }
+cchar *strfrom( char *buf, ui size, long	x ) { return mkstr( buf, size, "%ld",	x ); }
+cchar *strfrom( char *buf, ui size, long long	x ) { return mkstr( buf, size, "%lld",	x ); }
+cchar *strfrom( char *buf, ui size, ulong	x ) { return mkstr( buf, size, "%lu",	x ); }
+cchar *strfrom( char *buf, ui size, ulonglong	x ) { return mkstr( buf, size, "%llu",	x ); }
+cchar *strfrom( char *buf, ui size, float	x ) { return mkstr( buf, size, "%g",	x ); }
+cchar *strfrom( char *buf, ui size, double	x ) { return mkstr( buf, size, "%g",	x ); }
+
+#define STR(x) strfrom( array<char, 32>().data(), 32, (x) )
 
 ˂ Num> Num	strto			  (cchar *str, cchar **end) { return 0;	STATIC_ASSERT( false		); }
 ˂˃ int		strto< int		> (cchar *str, cchar **end) { return strtol	(str, (char **)end, 0	); }
@@ -152,9 +188,8 @@ STATIC_ASSERT( N("4321"	) == 4321	);
 		return true;
 	}
 
-	fprintf( stderr, "%s: %s ", str, _("It's not a number. Used by default"));
-	fprint( stderr, *x);
-	fprintf( stderr, "\n");
+	fprintf( stderr, "%s: %s %s\n"
+		, str, _("It's not a number. Used by default"), STR(*x));
 	return false;
 }
 
@@ -168,9 +203,8 @@ bool str_to_num1( string_view str, long *x)
 	if( end - &str[0] == size(str) )
 		return true;
 
-	fprintf( stderr, "%.*s: %s ", int( size( str)), &str[0], _("It's not a number. Used by default"));
-	fprint( stderr, *x);
-	fprintf( stderr, "\n");
+	fprintf( stderr, "%.*s: %s %s\n", int( size( str)), &str[0]
+		, _("It's not a number. Used by default"), STR(*x));
 	return false;
 }
 
@@ -181,9 +215,8 @@ bool str_to_num1( cchar *str, cchar *end, long *x)
 
 	if( end == nullptr || (end - str < len) )
 	{
-		fprintf( stderr, "%.*s: %s ", len, str, _("It's not a number. Used by default"));
-		fprint( stderr, *x);
-		fprintf( stderr, "\n");
+		fprintf( stderr, "%.*s: %s %s\n", len, str
+			, _("It's not a number. Used by default"), STR(*x));
 		return false;
 	}
 
@@ -238,8 +271,8 @@ CE	Param		( char _opt, cchar *_shortname, cchar *_longname)
 	cchar*	shortname;
 	cchar*	longname;
 
-virtual	void	usage_s	( void			) const	{ printf( "%c", opt);						}
-virtual	void	usage_l	( void			) const	{ printf("\t"); usage_s(); printf("\t%s\n", _(longname));	}
+virtual	void	usage_l	( void			) const	{ printf("\t%s\t%s\n", usage_s(B(64)), _(longname));	}
+virtual	cchar*	usage_s	( char *buf, ui size	) const	{ return mkstr( buf, size, "%c", opt);			}
 virtual	ui	test	( ui slots, ui poles	) const	= 0;
 virtual	void	print	( ui val		) const	= 0;
 virtual	bool	load	( cchar *arg		)	= 0;
@@ -252,7 +285,7 @@ enum	Sel						{ any = 0, yes = 1, no = 2				};
 CE	Param_balans	( void			): Param( 'b', "balanc", "stator balance"), sel(any) {}
 
 	Sel	sel;
-virtual	void	usage_s	( void			) cØnst	{ printf( "%c[+|-|any]", opt);			}
+virtual	cchar*	usage_s	( char *buf, ui size	) cØnst	{ return mkstr( buf, size, "%c[+|-|any]", opt);		}
 virtual	ui	test	( ui slots, ui poles	) cØnst { ui r = slots%2 + 1; return !sel || sel == r ? r : 0;	}
 virtual	void	print	( ui val		) cØnst	{ static cchar *c[]={"+","-"}; printf("%s", c[val-1]);	}
 virtual	bool	load	( cchar *arg		) Ø
@@ -286,9 +319,9 @@ CE	Param_range	( char opt, cchar *shortname, cchar *longname, ui _min, ui _max)
 	ui	max;
 CE	ui	minmax	( ui val	) const	{ return (min <= val && val <= max) ? val : 0;			}
 
-virtual	void	usage_s	( void		) cØnst	{ printf( "%c<%s>", opt, _("range"));				}
-virtual	void	print	( ui val	) cØnst	{ printf( "%u", val);						}
-virtual	bool	load	( cchar *arg	) Ø
+virtual	cchar*	usage_s	( char *buf, ui size	) cØnst	{ return mkstr( buf, size, "%c<%s>", opt, _("range"));	}
+virtual	void	print	( ui val		) cØnst	{ printf( "%u", val);					}
+virtual	bool	load	( cchar *arg		) Ø
 	{
 		switch( num_sign_num( arg, '-', &min, &max))
 		{
@@ -387,7 +420,7 @@ struct Param_q			final: Print_config
 CE	Param_q		( void			)	: Print_config( 'q', "q", "q = slots/poles/phases"), sample(0) {}
 
 	ui	sample;
-virtual	void	usage_s	( void			) cØnst	{ printf( "%c<%s>", opt, _("fraction"));			}
+virtual	cchar*	usage_s	( char *buf, ui size	) cØnst	{ return mkstr( buf, size, "%c<%s>", opt, _("fraction"));	}
 virtual	ui	test	( ui slots, ui poles	) cØnst
 	{
 		slots /= 3;
@@ -499,9 +532,7 @@ STATIC	bool	test1	( ui slots, ui poles	)
 
 		angle α = 30⁰ + ε⁰;
 		angle ρ = div_mul( 180⁰, slots, poles);
-
-		ui a = 0; ui b = 0; ui c = 0;
-		ui A = 0; ui B = 0; ui C = 0;
+		ui a = 0, b = 0, c = 0, A = 0, B = 0, C = 0;
 
 		for( ui i = 0; i < slots; i++ )
 		{
@@ -519,7 +550,7 @@ STATIC	bool	test1	( ui slots, ui poles	)
 	}
 STATIC	bool	test2	( ui slots, ui poles	)	{ return test0( slots, poles) == test1( slots, poles);	}
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return test0(slots, poles) ? pack(slots, poles) : 0;	}
-virtual	void	usage_s	( void			) cØnst	{							}
+virtual	cchar*	usage_s	( char *buf, ui size	) cØnst	{ return "";						}
 virtual	void	usage_l	( void			) cØnst	{							}
 virtual	void	print	( ui val		) cØnst
 	{
@@ -534,8 +565,8 @@ virtual	void	print	( ui val		) cØnst
 
 		char *sxema = BUF;
 		angle α = 30⁰ + ε⁰;
-		ui a = 0; ui b = 0; ui c = 0;
-		ui A = 0; ui B = 0; ui C = 0;
+		ui a = 0, b = 0, c = 0, A = 0, B = 0, C = 0;
+
 		for( ui i = 0; i < slots; i++ )
 		{
 			     if( α <  60⁰ ) { *sxema++ = 'A'; A++; }
@@ -628,9 +659,9 @@ Param *PARAMS[] = // массив всех параметров
 , &par_poles
 , &par_balans
 //, &print_config
-, &par_q
-, &par_winding_factor
 , &par_cogging
+, &par_winding_factor
+, &par_q
 , &print_sxema
 };
 enum { slots_col = 0 };
@@ -786,14 +817,14 @@ int find_n_print_schemes( void )
 
 int usage( void)
 {
-	printf(	"\n%s\n\n%s: " APPNAME " [-h]"
-	      , _("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)")
-	      , _("Usage")										);
+	printf(	"\n%s\n\n%s:\n",
+		_("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)"),
+		_("Usage")										);
+	int n = 79 - printf( "        " APPNAME " [-h]");
 	for( ui i = 0; i < size(PARAMS)-1; i++)
 	{
-		printf(" [");
-		PARAMS[i]->usage_s();
-		printf("]");
+		if( (n -= printf(" [%s]", PARAMS[i]->usage_s(B(64)) )) < 0 )
+			n = 79 - printf("\n       ");
 	}
 	printf(	"\n\n%s:\n", _("Parameters")								);
 	printf(	"\t-h\t\t%s\n", _("display this help and exit")						);
@@ -809,7 +840,7 @@ int usage( void)
 	marginprint( 8, 8, 79-8, _(
 		"For a 46-pole rotor, we will find all the winding options among balanced stators "
 		"with a number of slots from 3 to 45 and a winding factor of more than 0.6")		);
-	printf( "\t>>> " APPNAME " p46 b+ s3-45 w0.6-\n"						);
+	printf( "\n> " APPNAME " p46 b+ s3-45 w0.6-\n"							);
 
 	par_slots.min = 3;
 	par_slots.max = 45;

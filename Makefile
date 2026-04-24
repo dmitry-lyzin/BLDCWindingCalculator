@@ -16,8 +16,11 @@ install: $(APPNAME) locale/ru/LC_MESSAGES/$(APPNAME).mo
 uninstall:
 	rm -rf $(BIN)/$(APPNAME) $(LOCALE)/ru/LC_MESSAGES/$(APPNAME).mo
 
+
 locale/ru/LC_MESSAGES/$(APPNAME).pot: $(APPNAME).cpp
-	xgettext --from-code=UTF-8 --keyword=_ --package-name $(APPNAME) --package-version 0.1 --default-domain $(APPNAME) \
+	xgettext --keyword=_ --from-code=UTF-8 --package-name $(APPNAME) --package-version 0.1 --default-domain $(APPNAME) \
+		 --omit-header --no-location --sort-output --join-existing --output $@ $<
+	xgettext             --from-code=UTF-8 --package-name $(APPNAME) --package-version 0.1 --default-domain $(APPNAME) \
 		 --omit-header --no-location --sort-output --join-existing --output $@ $<
 %.po: %.pot
 	msginit --no-translator --locale ru.utf8 --output-file $@ --input $<

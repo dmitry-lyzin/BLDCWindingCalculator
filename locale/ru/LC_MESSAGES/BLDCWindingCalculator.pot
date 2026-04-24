@@ -18,17 +18,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #, c-format
-msgid "%u schemes found\n"
-msgstr "Найдено %u схем\n"
-
-msgid "1 scheme found\n"
-msgstr "Найдена 1 схема\n"
+msgid "%u scheme found\n"
+msgid_plural "%u schemes found\n"
+msgstr[0] "Найдена %u схема\n"
+msgstr[1] "Найдены %u схемы\n"
+msgstr[2] "Найдено %u схем\n"
 
 msgid "Example"
 msgstr "Пример"
 
 msgid "It's not a number. Used by default"
 msgstr "Это не число. Пусть будет"
+
+msgid "No schemes were found"
+msgstr "Никаких схем не найдено"
 
 #, c-format
 msgid "Number of %s must be divisible by %u!"
@@ -75,9 +78,6 @@ msgstr "конфигурация мотора"
 
 msgid "display this help and exit"
 msgstr "выдать подсказку и сдохнуть"
-
-msgid "for a "
-msgstr ""
 
 msgid ""
 "for a 60-pole rotor, we will find all the winding options among stators with "

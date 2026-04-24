@@ -719,9 +719,9 @@ int find_n_print_schemes( void )
 	// последняя колонка всегда есть, там схема сидит
 	PARAMS[ size(PARAMS)-1 ]->column = true;
 
-	if( found == 0 )
+	if( ! found )
 	{
-		printf(_("%u schemes found\n"), 0);
+		printf("%s\n", _("No schemes were found"));
 		return 0;
 	}
 
@@ -779,8 +779,7 @@ int find_n_print_schemes( void )
 	}
 
 	print_hr( hr_len );
-	if( found == 1)	printf( "%s", _("1 scheme found\n")	);
-	else		printf( _("%u schemes found\n"), found	);
+	printf( ngettext("%u scheme found\n", "%u schemes found\n", found), found);
 
 	return found;
 }
@@ -807,21 +806,16 @@ int usage( void)
 		"or even both numbers can be omitted (one '-' remains) or one number can be specified "
 		"(there will be a range of one number)")						);
 	printf( "%s:\n", _("Example")									);
-
-#define	EX_slots "80"
-#define	EX_poles "60"
-#define	EX_wf    "85" //%
-
 	marginprint( 8, 8, 79-8, _(
-		"for a " EX_poles "-pole rotor, we will find all the winding options among stators with "
-		"a number of slots from 3 to " EX_slots " and a winding factor greater than 0." EX_wf)	);
-	printf( "\n\t" APPNAME " p" EX_poles " s-" EX_slots " w." EX_wf "-\n"				);
+		"for a 60-pole rotor, we will find all the winding options among stators with "
+		"a number of slots from 3 to 80 and a winding factor greater than 0.85")		);
+	printf( "\n\t" APPNAME " p60 s-80 w.85-\n"							);
 
 	par_slots.min = 3;
-	par_slots.max = N( EX_slots);
-	par_poles.min = N( EX_poles);
+	par_slots.max = 80;
+	par_poles.min = 60;
 	par_poles.max = par_poles.min;
-	par_winding_factor.min = N( EX_wf) * 10000;
+	par_winding_factor.min = 850000;
 	//par_balans.sel = Param_balans::yes;
 
 	find_n_print_schemes();

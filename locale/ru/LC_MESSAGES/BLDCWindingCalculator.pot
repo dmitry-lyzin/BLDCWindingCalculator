@@ -27,6 +27,15 @@ msgstr[2] "Найдено %u схем\n"
 msgid "Example"
 msgstr "Пример"
 
+msgid ""
+"For a 46-pole rotor, we will find all the winding options among balanced "
+"stators with a number of slots from 3 to 45 and a winding factor of more "
+"than 0.6"
+msgstr ""
+"Для 46-полюсного ротора мы найдем все варианты обмоток среди "
+"сбалансированных статоров с числом пазов от 3 до 45 и коэффициентом намотки "
+"более 0.6"
+
 msgid "It's not a number. Used by default"
 msgstr "Это не число. Пусть будет"
 
@@ -78,14 +87,6 @@ msgstr "конфигурация мотора"
 
 msgid "display this help and exit"
 msgstr "выдать подсказку и сдохнуть"
-
-msgid ""
-"For a 46-pole rotor, we will find all the winding options among balanced stators "
-"with a number of slots from 3 to 45 and a winding factor of more than 0.6"
-
-msgstr ""
-"Для 46-полюсного ротора мы найдем все варианты обмоток среди сбалансированных "
-"статоров с числом пазов от 3 до 45 и коэффициентом намотки более 0.6"
 
 msgid "fraction"
 msgstr "дробь"

@@ -37,7 +37,6 @@ using Complex	= std::complex< double>;
 using std::swap;
 using std::size;
 using std::string_view;
-using std::array;
 
 #ifdef __unix__
 #	include <unistd.h>
@@ -117,6 +116,7 @@ STATIC_ASSERT( div_mul(333⁰, 3, 2) == 222⁰ );
 // очень маленький угол
 CE angle ε⁰ = 32*4;
 
+//--------------------------------------------------------------------------------------------------------------
 template <ui SIZE = 32>
 struct strf
 {
@@ -187,37 +187,6 @@ STATIC_ASSERT( N("4321"	) == 4321	);
 	return false;
 }
 
-bool str_to_num1( string_view str, long *x)
-{
-	cchar *end = &str[0];
-	long res = strto<long>( &str[0], &end);
-	if( end > &str[0] )
-		*x = res;
-
-	if( end - &str[0] == size(str) )
-		return true;
-
-	fprintf( stderr, "%.*s: %s %s\n", int( size( str)), &str[0]
-		, _("It's not a number. Used by default"), &*strf(*x));
-	return false;
-}
-
-bool str_to_num1( cchar *str, cchar *end, long *x)
-{
-	int len = end - str;
-	long res = strto<long>( str, &end);
-
-	if( end == nullptr || (end - str < len) )
-	{
-		fprintf( stderr, "%.*s: %s %s\n", len, str
-			, _("It's not a number. Used by default"), &*strf(*x));
-		return false;
-	}
-
-	*x = res;
-	return true;
-}
-
 ˂ num> ui num_sign_num( cchar *str, cchar sign, num *x1, num *x2 )
 {
 	cchar *after_sign = str;
@@ -234,24 +203,6 @@ bool str_to_num1( cchar *str, cchar *end, long *x)
 		}
 	}
 	return str_to_num( str, x1);
-}
-
-ui num_sign_num1( cchar *str, cchar sign, long *x1, long *x2 )
-{
-	cchar *after_sign = str;
-	while( *after_sign)
-	{
-		if( *after_sign++ == sign)
-		{
-			ui res = 1;
-			if( str[0] != sign)
-				res = str_to_num1( str, x1);
-			if( after_sign[0] )
-				res = res && str_to_num1( after_sign, x2);
-			return res * 2;
-		}
-	}
-	return str_to_num1( str, x1);
 }
 
 //--------------------------------------------------------------------------------------------------------------

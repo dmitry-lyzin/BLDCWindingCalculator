@@ -37,7 +37,7 @@ msgstr ""
 "более 0.6"
 
 msgid "It's not a number. Used by default"
-msgstr "Это не число. Пусть будет"
+msgstr "Это не число. Подставим"
 
 msgid "No schemes were found"
 msgstr "Никаких схем не найдено"
@@ -86,7 +86,7 @@ msgid "configuration"
 msgstr "конфигурация мотора"
 
 msgid "display this help and exit"
-msgstr "выдать подсказку и сдохнуть"
+msgstr "выдать эту подсказку и сдохнуть"
 
 msgid "fraction"
 msgstr "дробь"

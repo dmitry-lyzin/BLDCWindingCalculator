@@ -17,17 +17,16 @@
 #include <libintl.h>
 #define _USE_MATH_DEFINES
 #include <complex>
-#include <array>
 
 #define STATIC_ASSERT(exp) static_assert( exp, #exp " FAIL!" );
 #define DIV(x)	true
-#define B(size)	(array< char, (size)>().data()), (size)
 #define ˂	template< class
 #define ˂˃	template<>
 #define cØnst	const override
 #define Ø	override
 #define STATIC	constexpr static
 #define CE	constexpr
+#define OP	operator
 
 using ui	= unsigned int;
 using ulong	= unsigned long;
@@ -118,39 +117,34 @@ STATIC_ASSERT( div_mul(333⁰, 3, 2) == 222⁰ );
 // очень маленький угол
 CE angle ε⁰ = 32*4;
 
-cchar *mkstr( char *buf, ui size, cchar *fmt, ...)
+template <ui SIZE = 32>
+struct strf
 {
-	va_list ap;
-	va_start( ap, fmt);
-	int n = vsnprintf( buf, size, fmt, ap);
-	va_end( ap);
-	assert( n > -1 && n < size);
-	return buf;
-}
+	strf		( cchar *fmt, ... ) {
+						va_list ap;
+						va_start( ap, fmt);
+						int n = vsnprintf( data, SIZE, fmt, ap);
+						va_end( ap);
+						assert( n > -1 && n < SIZE);
+					    }
+	strf		( int		x ): strf( "%d",	x ) {}
+	strf		( ui		x ): strf( "%u",	x ) {}
+	strf		( long		x ): strf( "%ld",	x ) {}
+	strf		( long long	x ): strf( "%lld",	x ) {}
+	strf		( ulong		x ): strf( "%lu",	x ) {}
+	strf		( ulonglong	x ): strf( "%llu",	x ) {}
+	strf		( float		x ): strf( "%g",	x ) {}
+	strf		( double	x ): strf( "%g",	x ) {}
 
-template< ui SIZE>
-cchar *mkstr( char (&buf)[SIZE], cchar *fmt, ...)
-{
-	va_list ap;
-	va_start( ap, fmt);
-	int n = vsnprintf( buf, SIZE, fmt, ap);
-	va_end( ap);
-	assert( n > -1 && n < SIZE);
-	return buf;
-}
+CE	strf		( void	)	{ data[0] = 0;	}
+CE OP	cchar*		( void	) const	{ return  data; }
+CE OP	char*		( void	)	{ return  data; }
+CE	cchar&	OP *	( void	) const	{ return *data; }
+CE	char&	OP *	( void	)	{ return *data; }
+	char	data	[ SIZE	];
+};
 
 #if DIV( перегрузки для преобразований число <-> строка )
-cchar *strfrom( char *buf, ui size, int		x ) { return mkstr( buf, size, "%d",	x ); }
-cchar *strfrom( char *buf, ui size, ui		x ) { return mkstr( buf, size, "%u",	x ); }
-cchar *strfrom( char *buf, ui size, long	x ) { return mkstr( buf, size, "%ld",	x ); }
-cchar *strfrom( char *buf, ui size, long long	x ) { return mkstr( buf, size, "%lld",	x ); }
-cchar *strfrom( char *buf, ui size, ulong	x ) { return mkstr( buf, size, "%lu",	x ); }
-cchar *strfrom( char *buf, ui size, ulonglong	x ) { return mkstr( buf, size, "%llu",	x ); }
-cchar *strfrom( char *buf, ui size, float	x ) { return mkstr( buf, size, "%g",	x ); }
-cchar *strfrom( char *buf, ui size, double	x ) { return mkstr( buf, size, "%g",	x ); }
-
-#define STR(x) strfrom( array<char, 32>().data(), 32, (x) )
-
 ˂ Num> Num	strto			  (cchar *str, cchar **end) { return 0;	STATIC_ASSERT( false		); }
 ˂˃ int		strto< int		> (cchar *str, cchar **end) { return strtol	(str, (char **)end, 0	); }
 //˂˃ ui		strto< ui		> (cchar *str, cchar **end) { return strtoul	(str, (char **)end, 0	); }
@@ -189,7 +183,7 @@ STATIC_ASSERT( N("4321"	) == 4321	);
 	}
 
 	fprintf( stderr, "%s: %s %s\n"
-		, str, _("It's not a number. Used by default"), STR(*x));
+		, str, _("It's not a number. Used by default"), &*strf(*x));
 	return false;
 }
 
@@ -204,7 +198,7 @@ bool str_to_num1( string_view str, long *x)
 		return true;
 
 	fprintf( stderr, "%.*s: %s %s\n", int( size( str)), &str[0]
-		, _("It's not a number. Used by default"), STR(*x));
+		, _("It's not a number. Used by default"), &*strf(*x));
 	return false;
 }
 
@@ -216,7 +210,7 @@ bool str_to_num1( cchar *str, cchar *end, long *x)
 	if( end == nullptr || (end - str < len) )
 	{
 		fprintf( stderr, "%.*s: %s %s\n", len, str
-			, _("It's not a number. Used by default"), STR(*x));
+			, _("It's not a number. Used by default"), &*strf(*x));
 		return false;
 	}
 
@@ -271,8 +265,8 @@ CE	Param		( char _opt, cchar *_shortname, cchar *_longname)
 	cchar*	shortname;
 	cchar*	longname;
 
-virtual	cchar*	usage_s	( char *buf, ui size	) const	{ return mkstr( buf, size, "%c", opt);			}
-virtual	void	usage_l	( void			) const	{ printf("\t%s\t%s\n", usage_s(B(64)), _(longname));	}
+virtual	strf<>	usage_s	( void			) const	{ return { "%c", opt };					}
+virtual	void	usage_l	( void			) const	{ printf("\t%s\t%s\n", &*usage_s(), _(longname));	}
 virtual	ui	test	( ui slots, ui poles	) const	= 0;
 virtual	void	print	( ui val		) const	= 0;
 virtual	bool	load	( cchar *arg		)	= 0;
@@ -285,7 +279,7 @@ enum	Sel						{ any = 0, yes = 1, no = 2				};
 CE	Param_balans	( void			): Param( 'b', "balanc", "stator balance"), sel(any) {}
 
 	Sel	sel;
-virtual	cchar*	usage_s	( char *buf, ui size	) cØnst	{ return mkstr( buf, size, "%c[+|-|any]", opt);		}
+virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c[+|-|any]", opt };			}
 virtual	ui	test	( ui slots, ui poles	) cØnst { ui r = slots%2 + 1; return !sel || sel == r ? r : 0;	}
 virtual	void	print	( ui val		) cØnst	{ static cchar *c[]={"+","-"}; printf("%s", c[val-1]);	}
 virtual	bool	load	( cchar *arg		) Ø
@@ -317,10 +311,10 @@ CE	Param_range	( char opt, cchar *shortname, cchar *longname, ui _min, ui _max)
 
 	ui	min;
 	ui	max;
-CE	ui	minmax	( ui val	) const	{ return (min <= val && val <= max) ? val : 0;			}
+CE	ui	minmax	( ui val		) const	{ return (min <= val && val <= max) ? val : 0;	}
 
-virtual	cchar*	usage_s	( char *buf, ui size	) cØnst	{ return mkstr( buf, size, "%c<%s>", opt, _("range"));	}
-virtual	void	print	( ui val		) cØnst	{ printf( "%u", val);					}
+virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", opt, _("range") };		}
+virtual	void	print	( ui val		) cØnst	{ printf( "%u", val);				}
 virtual	bool	load	( cchar *arg		) Ø
 	{
 		switch( num_sign_num( arg, '-', &min, &max))
@@ -420,7 +414,7 @@ struct Param_q			final: Print_config
 CE	Param_q		( void			)	: Print_config( 'q', "q", "q = slots/poles/phases"), sample(0) {}
 
 	ui	sample;
-virtual	cchar*	usage_s	( char *buf, ui size	) cØnst	{ return mkstr( buf, size, "%c<%s>", opt, _("fraction"));	}
+virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", opt, _("fraction") };	}
 virtual	ui	test	( ui slots, ui poles	) cØnst
 	{
 		slots /= 3;
@@ -550,7 +544,7 @@ STATIC	bool	test1	( ui slots, ui poles	)
 	}
 STATIC	bool	test2	( ui slots, ui poles	)	{ return test0( slots, poles) == test1( slots, poles);	}
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return test0(slots, poles) ? pack(slots, poles) : 0;	}
-virtual	cchar*	usage_s	( char *buf, ui size	) cØnst	{ return "";						}
+virtual	strf<>	usage_s	( void			) cØnst	{ return { };						}
 virtual	void	usage_l	( void			) cØnst	{							}
 virtual	void	print	( ui val		) cØnst
 	{
@@ -823,7 +817,7 @@ int usage( void)
 	int n = 79 - printf( "        " APPNAME " [-h]");
 	for( ui i = 0; i < size(PARAMS)-1; i++)
 	{
-		if( (n -= printf(" [%s]", PARAMS[i]->usage_s(B(64)) )) < 0 )
+		if( (n -= printf(" [%s]", &*(PARAMS[i]->usage_s())) ) < 0 )
 			n = 79 - printf("\n       ");
 	}
 	printf(	"\n\n%s:\n", _("Parameters")								);
@@ -877,7 +871,7 @@ int main( int argc, char *const *argv )
 #else
 	cchar *p = strrchr( argv[0], '\\');
 	assert(p);
-	cchar *locale = mkstr( B(1024), "%.*s\\locale", int(p - argv[0]), argv[0]);
+	cchar *locale = strf<1024>( "%.*s\\locale", int(p - argv[0]), argv[0]);
 
 	SetConsoleOutputCP(65001);
 	if( isatty( STDERR_FILENO))

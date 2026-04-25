@@ -206,17 +206,17 @@ STATIC_ASSERT( N("4321"	) == 4321	);
 }
 
 //--------------------------------------------------------------------------------------------------------------
-struct Param
+struct Opt
 {
-CE	Param		( char _opt, cchar *_shortname, cchar *_longname)
-	: column(false), opt(_opt), shortname(_shortname), longname(_longname) {}
+CE	Opt		( char _chr, cchar *_shortname, cchar *_longname)
+	: column(false), chr(_chr), shortname(_shortname), longname(_longname) {}
 
-	bool	column;
-	char	opt;
 	cchar*	shortname;
 	cchar*	longname;
+	char	chr;
+	bool	column;
 
-virtual	strf<>	usage_s	( void			) const	{ return { "%c", opt };					}
+virtual	strf<>	usage_s	( void			) const	{ return { "%c", chr };					}
 virtual	void	usage_l	( void			) const	{ printf("\t%s\t%s\n", &*usage_s(), _(longname));	}
 virtual	ui	test	( ui slots, ui poles	) const	= 0;
 virtual	void	print	( ui val		) const	= 0;
@@ -224,13 +224,13 @@ virtual	bool	load	( cchar *arg		)	= 0;
 };
 
 //--------------------------------------------------------------------------------------------------------------
-struct Param_balans: Param
+struct Opt_balans: Opt
 {
 enum	Sel						{ any = 0, yes = 1, no = 2				};
-CE	Param_balans	( void			): Param( 'b', "balanc", "stator balance"), sel(any) {}
+CE	Opt_balans	( void			): Opt( 'b', "balanc", "stator balance"), sel(any) {}
 
 	Sel	sel;
-virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c[+|-|any]", opt };			}
+virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c[+|-|any]", chr };			}
 virtual	ui	test	( ui slots, ui poles	) cØnst { ui r = slots%2 + 1; return !sel || sel == r ? r : 0;	}
 virtual	void	print	( ui val		) cØnst	{ static cchar *c[]={"+","-"}; printf("%s", c[val-1]);	}
 virtual	bool	load	( cchar *arg		) Ø
@@ -252,19 +252,19 @@ virtual	bool	load	( cchar *arg		) Ø
 		assert( false);
 		return false;
 	}
-} par_balans;
+} opt_balans;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Param_range: Param
+struct Opt_range: Opt
 {
-CE	Param_range	( char opt, cchar *shortname, cchar *longname, ui _min, ui _max)
-	: Param( opt, shortname, longname), min(_min), max(_max) {}
+CE	Opt_range	( char chr, cchar *shortname, cchar *longname, ui _min, ui _max)
+	: Opt( chr, shortname, longname), min(_min), max(_max) {}
 
 	ui	min;
 	ui	max;
 CE	ui	minmax	( ui val		) const	{ return (min <= val && val <= max) ? val : 0;	}
 
-virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", opt, _("range") };		}
+virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", chr, _("range") };		}
 virtual	void	print	( ui val		) cØnst	{ printf( "%u", val);				}
 virtual	bool	load	( cchar *arg		) Ø
 	{
@@ -280,19 +280,19 @@ virtual	bool	load	( cchar *arg		) Ø
 };
 
 //--------------------------------------------------------------------------------------------------------------
-struct Param_range_step: Param_range
+struct Opt_range_step: Opt_range
 {
-CE	Param_range_step( char opt, cchar *shortname, cchar *longname, ui min, ui max, ui _step)
-	: Param_range( opt, shortname, longname, min, max), step(_step) {}
+CE	Opt_range_step( char chr, cchar *shortname, cchar *longname, ui min, ui max, ui _step)
+	: Opt_range( chr, shortname, longname, min, max), step(_step) {}
 
 	ui	step;
 virtual	bool	load	( cchar *arg	)
 	{
-		if( !Param_range::load( arg))
+		if( !Opt_range::load( arg))
 			return false;
 		if( step && ( ! min || min % step) )
 		{
-			fprintf( stderr, "%c%s: ", opt, arg);
+			fprintf( stderr, "%c%s: ", chr, arg);
 			fprintf( stderr, _("Number of %s must be divisible by %u!"), _(longname), step );
 			fprintf( stderr, "\n");
 			return false;
@@ -303,51 +303,51 @@ virtual	bool	load	( cchar *arg	)
 };
 
 //--------------------------------------------------------------------------------------------------------------
-struct Param_poles		final: Param_range_step
+struct Opt_poles		final: Opt_range_step
 {
-CE	Param_poles	( void			): Param_range_step( 'p', "poles", "magnet poles", 2, 100, 2) {}
+CE	Opt_poles	( void			): Opt_range_step( 'p', "poles", "magnet poles", 2, 100, 2) {}
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return poles; }
-} par_poles;
+} opt_poles;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Param_slots		final: Param_range_step
+struct Opt_slots		final: Opt_range_step
 {
-CE	Param_slots	( void			)	: Param_range_step( 's', "slots", "slots in the stator", 3, 99, 3) {}
+CE	Opt_slots	( void			): Opt_range_step( 's', "slots", "slots in the stator", 3, 99, 3) {}
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return slots; }
 virtual	bool	load	( cchar *arg		) Ø
 	{
-		if( !Param_range_step::load( arg))
+		if( !Opt_range_step::load( arg))
 			return false;
 
 		if( max >= size(BUF) / 2)
 		{
-			fprintf( stderr, "%c%s: %s (> %u)!\n", opt, arg, _("Too many slots"), ui( size( BUF)) / 2);
+			fprintf( stderr, "%c%s: %s (> %u)!\n", chr, arg, _("Too many slots"), ui( size( BUF)) / 2);
 			exit( EXIT_FAILURE);
 		}
 
 		return true;
 	}
-} par_slots;
+} opt_slots;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Param_cogging		final: Param_range
+struct Opt_cogging		final: Opt_range
 {
-CE	Param_cogging	( void			)	: Param_range( 'c', "cogging", "cogging steps", 0, -1) {}
+CE	Opt_cogging	( void			): Opt_range( 'c', "cogging", "cogging steps", 0, -1) {}
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles));	}
-} par_cogging;
+} opt_cogging;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Param_reduction		final: Param_range
+struct Opt_reduction		final: Opt_range
 {
-CE	Param_reduction	( void			)	: Param_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0, -1) {}
+CE	Opt_reduction	( void			): Opt_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0, -1) {}
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles)/6);	}
-} par_reduct;
+} opt_reduct;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Print_config: Param
+struct Print_config: Opt
 {
-CE	Print_config	( char opt, cchar *shortname, cchar *longname): Param( opt, shortname, longname) {}
-CE	Print_config	( void			)	: Param( 0, "config", "configuration") {}
+CE	Print_config	( char chr, cchar *shortname, cchar *longname): Opt( chr, shortname, longname) {}
+CE	Print_config	( void			): Opt( 0, "config", "configuration") {}
 
 STATIC	auto	half = (sizeof(ui)*8 / 2);
 STATIC	ui	pack	( ui slots, ui poles	)	{ return (slots << half) + poles;		}
@@ -360,12 +360,12 @@ virtual	bool	load	( cchar *arg		) Ø	{ return false;					}
 } print_config;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Param_q			final: Print_config
+struct Opt_q			final: Print_config
 {
-CE	Param_q		( void			)	: Print_config( 'q', "q", "q = slots/poles/phases"), sample(0) {}
+CE	Opt_q		( void			): Print_config( 'q', "q", "q = slots/poles/phases"), sample(0) {}
 
 	ui	sample;
-virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", opt, _("fraction") };	}
+virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", chr, _("fraction") };	}
 virtual	ui	test	( ui slots, ui poles	) cØnst
 	{
 		slots /= 3;
@@ -384,7 +384,7 @@ virtual	bool	load	( cchar *arg		) Ø
 
 		if( !numerator || !denominator )
 		{
-			fprintf( stderr, "%c%s: %s %s = 0?\n", opt, arg, _(longname), _(shortname));
+			fprintf( stderr, "%c%s: %s %s = 0?\n", chr, arg, _(longname), _(shortname));
 			exit( EXIT_FAILURE);
 		}
 
@@ -392,12 +392,12 @@ virtual	bool	load	( cchar *arg		) Ø
 		sample = pack( numerator/nod, denominator/nod );
 		return true;
 	}
-} par_q;
+} opt_q;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Param_winding_factor	final: Param_range
+struct Opt_winding_factor	final: Opt_range
 {
-CE	Param_winding_factor( void		)	: Param_range( 'w', "WF", "winding factor", 0, scale) {}
+CE	Opt_winding_factor( void		): Opt_range( 'w', "WF", "winding factor", 0, scale) {}
 
 STATIC	ui	nuls	= 6;
 STATIC	ui	scale	= pow10( nuls);
@@ -452,7 +452,7 @@ virtual	bool	load	( cchar *arg		) Ø
 		case 2:
 			if( d_min > 1. || d_max > 1. )
 			{
-				fprintf( stderr, "%c%s: %s > 1 ?\n", opt, arg, _(longname) );
+				fprintf( stderr, "%c%s: %s > 1 ?\n", chr, arg, _(longname) );
 				exit( EXIT_FAILURE);
 			}
 			return true;
@@ -460,12 +460,12 @@ virtual	bool	load	( cchar *arg		) Ø
 		assert( false);
 		return false;
 	}
-} par_winding_factor;
+} opt_winding_factor;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Print_sxema		final: Print_config
 {
-CE	Print_sxema	( void			)	: Print_config( 0, "winding scheme", "winding scheme") {}
+CE	Print_sxema	( void			): Print_config( 0, "winding scheme", "winding scheme") {}
 STATIC	bool	test0	( ui slots, ui poles	)	{ return (poles / НОД( slots/3, poles)) % 3;		}
 STATIC	bool	test1	( ui slots, ui poles	)
 	{
@@ -599,14 +599,14 @@ STATIC_ASSERT( Print_sxema::test2( 60, 22) );
 #endif
 
 //--------------------------------------------------------------------------------------------------------------
-Param *PARAMS[] = // массив всех параметров
-{ &par_slots
-, &par_poles
-, &par_balans
+Opt *OPTIONS[] = // массив всех опций
+{ &opt_slots
+, &opt_poles
+, &opt_balans
 //, &print_config
-, &par_cogging
-, &par_winding_factor
-, &par_q
+, &opt_cogging
+, &opt_winding_factor
+, &opt_q
 , &print_sxema
 };
 enum { slots_col = 0 };
@@ -655,36 +655,36 @@ void print_hr( ui len)
 
 int find_n_print_schemes( void )
 {
-	ui &slots_min = par_slots.min;
-	ui &slots_max = par_slots.max;
-	ui &poles_min = par_poles.min;
-	ui &poles_max = par_poles.max;
+	ui &slots_min = opt_slots.min;
+	ui &slots_max = opt_slots.max;
+	ui &poles_min = opt_poles.min;
+	ui &poles_max = opt_poles.max;
 
-	ui val0	[size(PARAMS)];
-	ui val	[size(PARAMS)];
+	ui val0	[size(OPTIONS)];
+	ui val	[size(OPTIONS)];
 
 	ui found = 0;
 	for( ui slots = slots_min; slots <= slots_max; slots += 3)
 	{
 		for( ui poles = poles_min; poles <= poles_max; poles += 2)
 		{
-			for( ui i = 0; i < size(PARAMS); i++)
+			for( ui i = 0; i < size(OPTIONS); i++)
 			{
-				if( ! (val[i] = PARAMS[i]->test( slots, poles)) )
+				if( ! (val[i] = OPTIONS[i]->test( slots, poles)) )
 					goto label1;
 			}
 
 			if( ! found++)
 			{
-				for( ui i = 0; i < size(PARAMS); i++)
+				for( ui i = 0; i < size(OPTIONS); i++)
 					val0[i] = val[i];
 			}
 			else
 			{
-				for( ui i = 0; i < size(PARAMS)-1; i++) // последнюю колонку не проверяем
+				for( ui i = 0; i < size(OPTIONS)-1; i++) // последнюю колонку не проверяем
 				{
 					if( val0[i] != val[i])
-						PARAMS[i]->column = true;
+						OPTIONS[i]->column = true;
 				}
 				if( val0[slots_col] < val[slots_col] )
 					val0[slots_col] = val[slots_col];
@@ -693,7 +693,7 @@ int find_n_print_schemes( void )
 		}
 	}
 	// последняя колонка всегда есть, там схема сидит
-	PARAMS[ size(PARAMS)-1 ]->column = true;
+	OPTIONS[ size(OPTIONS)-1 ]->column = true;
 
 	if( ! found )
 	{
@@ -702,25 +702,25 @@ int find_n_print_schemes( void )
 	}
 
 	printf( "\n");
-	for( ui i = 0; i < size(PARAMS); i++)
+	for( ui i = 0; i < size(OPTIONS); i++)
 	{
-		if( ! PARAMS[i]->column )
+		if( ! OPTIONS[i]->column )
 		{
-			PARAMS[i]->print( val0[i]);
-			printf( "\t%s\n", _(PARAMS[i]->longname) );
+			OPTIONS[i]->print( val0[i]);
+			printf( "\t%s\n", _(OPTIONS[i]->longname) );
 		}
 	}
 	printf( "\n");
-	for( ui i = 0; i < size(PARAMS); i++)
+	for( ui i = 0; i < size(OPTIONS); i++)
 	{
-		if( PARAMS[i]->column )
-			printf( "%s\t", _(PARAMS[i]->shortname));
+		if( OPTIONS[i]->column )
+			printf( "%s\t", _(OPTIONS[i]->shortname));
 	}
 	printf( "\n");
 	ui hr_len = val0[slots_col];
-	for( ui i = 0; i < size(PARAMS)-1; i++)
+	for( ui i = 0; i < size(OPTIONS)-1; i++)
 	{
-		if( PARAMS[i]->column )
+		if( OPTIONS[i]->column )
 			hr_len += 8;
 	}
 
@@ -733,18 +733,18 @@ int find_n_print_schemes( void )
 		{
 			cchar *bl = "";
 
-			for( ui i = 0; i < size(PARAMS); i++)
+			for( ui i = 0; i < size(OPTIONS); i++)
 			{
-				if( ! (val[i] = PARAMS[i]->test( slots, poles)) )
+				if( ! (val[i] = OPTIONS[i]->test( slots, poles)) )
 					goto label2;
 			}
 
-			for( ui i = 0; i < size(PARAMS); i++)
+			for( ui i = 0; i < size(OPTIONS); i++)
 			{
-				if( PARAMS[i]->column)
+				if( OPTIONS[i]->column)
 				{
 					printf("%s", bl);
-					PARAMS[i]->print( val[i]);
+					OPTIONS[i]->print( val[i]);
 					bl = "\t";
 				}
 			}
@@ -764,35 +764,35 @@ int usage( void)
 {
 	printf(	"\n%s\n\n%s:\n"
 	      , _("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)")
-	      , _("Usage")										);
+	      , _("USAGE")										);
 	int n = 79 - printf( "        " APPNAME " [-h]");
-	for( ui i = 0; i < size(PARAMS)-1; i++)
+	for( ui i = 0; i < size(OPTIONS)-1; i++)
 	{
-		if( (n -= printf(" [%s]", &*(PARAMS[i]->usage_s())) ) < 0 )
+		if( (n -= printf(" [%s]", &*(OPTIONS[i]->usage_s())) ) < 0 )
 			n = 79 - printf("\n       ");
 	}
-	printf(	"\n\n%s:\n", _("Parameters")								);
+	printf(	"\n\n%s:\n", _("OPTIONS")								);
 	printf(	"\t-h\t\t%s\n", _("display this help and exit")						);
-	for( ui i = 0; i < size(PARAMS); i++)
-		PARAMS[i]->usage_l();
+	for( ui i = 0; i < size(OPTIONS); i++)
+		OPTIONS[i]->usage_l();
 
-	printf( "%s:\n\t<%s>  \t", _("Where"), _("range")						);
+	printf( "%s:\n\t<%s>  \t", _("ARGS"), _("range")						);
 	marginprint( 0, 24, 79-24, _(
 		"is the pair of numbers separated by a '-' sign. In this pair, the first or second "
 		"or even both numbers can be omitted (one '-' remains) or one number can be specified "
 		"(there will be a range of one number)")						);
-	printf( "%s:\n", _("Example")									);
+	printf( "%s:\n", _("EXAMPLE")									);
 	marginprint( 8, 8, 79-8, _(
 		"For a 46-pole rotor, we will find all the winding options among balanced stators "
 		"with a number of slots from 3 to 45 and a winding factor of more than 0.6")		);
 	printf( "\n> " APPNAME " p46 b+ s3-45 w0.6-\n"							);
 
-	par_slots.min = 3;
-	par_slots.max = 45;
-	par_poles.min = 46;
-	par_poles.max = par_poles.min;
-	par_winding_factor.min = 600000;
-	par_balans.sel = Param_balans::yes;
+	opt_slots.min = 3;
+	opt_slots.max = 45;
+	opt_poles.min = 46;
+	opt_poles.max = opt_poles.min;
+	opt_winding_factor.min = 600000;
+	opt_balans.sel = Opt_balans::yes;
 
 	find_n_print_schemes();
 
@@ -805,10 +805,10 @@ bool optproc( int opt, cchar *arg )
 	if( opt == 'h')
 		exit( usage() );
 
-	for( ui i = 0; i < size(PARAMS); i++)
+	for( ui i = 0; i < size(OPTIONS); i++)
 	{
-		if( opt == PARAMS[i]->opt )
-			return PARAMS[i]->load( arg);
+		if( opt == OPTIONS[i]->chr )
+			return OPTIONS[i]->load( arg);
 	}
 	return false;
 }

@@ -24,8 +24,11 @@ msgstr[0] "Найдена %u схема\n"
 msgstr[1] "Найдены %u схемы\n"
 msgstr[2] "Найдено %u схем\n"
 
-msgid "Example"
-msgstr "Пример"
+msgid "ARGS"
+msgstr "АРГУМЕНТЫ"
+
+msgid "EXAMPLE"
+msgstr "ПРИМЕР"
 
 msgid ""
 "For a 46-pole rotor, we will find all the winding options among balanced "
@@ -46,8 +49,8 @@ msgstr "Никаких схем не найдено"
 msgid "Number of %s must be divisible by %u!"
 msgstr "Число %s должно быть кратно %u!"
 
-msgid "Parameters"
-msgstr "Параметры"
+msgid "OPTIONS"
+msgstr "ОПЦИИ"
 
 msgid ""
 "The program to calculate the winding schemes of multi-pole electric motors "
@@ -58,14 +61,11 @@ msgstr ""
 msgid "Too many slots"
 msgstr "Слишком много пазов"
 
-msgid "Usage"
-msgstr "Использование"
+msgid "USAGE"
+msgstr "ИСПОЛЬЗОВАНИЕ"
 
 msgid "WF"
 msgstr "Kнамот"
-
-msgid "Where"
-msgstr "Где"
 
 msgid "Wrong parameter"
 msgstr "Неверный параметр"

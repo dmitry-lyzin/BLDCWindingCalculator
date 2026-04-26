@@ -182,7 +182,7 @@ STATIC_ASSERT( N("4321"	) == 4321	);
 		return true;
 	}
 
-	fprintf( stderr, "%s: %s %s\n"
+	fprintf( stderr, "%s:\t%s %s\n"
 		, str, _("It's not a number. Used by default"), &*strf(*x));
 	return false;
 }
@@ -292,9 +292,10 @@ virtual	bool	load	( cchar *arg	)
 			return false;
 		if( step && ( ! min || min % step) )
 		{
-			fprintf( stderr, "%c%s: ", chr, arg);
-			fprintf( stderr, _("Number of %s must be divisible by %u!"), _(longname), step );
-			fprintf( stderr, "\n");
+			fprintf( stderr, "%c%s:\t", chr, arg);
+			fprintf( stderr, _("The number of %s must be divisible by %u!"), _(longname), step );
+			min -= min % step;
+			fprintf( stderr, "\n\t%s: %u\n", _("Let's take the nearest suitable one"), min );
 			return false;
 		}
 
@@ -321,7 +322,7 @@ virtual	bool	load	( cchar *arg		) Ø
 
 		if( max >= size(BUF) / 2)
 		{
-			fprintf( stderr, "%c%s: %s (> %u)!\n", chr, arg, _("Too many slots"), ui( size( BUF)) / 2);
+			fprintf( stderr, "%c%s:\t%s (> %u)!\n", chr, arg, _("Too many slots"), ui( size( BUF)) / 2);
 			exit( EXIT_FAILURE);
 		}
 
@@ -384,7 +385,7 @@ virtual	bool	load	( cchar *arg		) Ø
 
 		if( !numerator || !denominator )
 		{
-			fprintf( stderr, "%c%s: %s %s = 0?\n", chr, arg, _(longname), _(shortname));
+			fprintf( stderr, "%c%s:\t%s %s = 0?\n", chr, arg, _(longname), _(shortname));
 			exit( EXIT_FAILURE);
 		}
 
@@ -452,7 +453,7 @@ virtual	bool	load	( cchar *arg		) Ø
 		case 2:
 			if( d_min > 1. || d_max > 1. )
 			{
-				fprintf( stderr, "%c%s: %s > 1 ?\n", chr, arg, _(longname) );
+				fprintf( stderr, "%c%s:\t%s > 1 ?\n", chr, arg, _(longname) );
 				exit( EXIT_FAILURE);
 			}
 			return true;
@@ -776,7 +777,7 @@ int usage( void)
 	for( ui i = 0; i < size(OPTIONS); i++)
 		OPTIONS[i]->usage_l();
 
-	printf( "%s:\n\t<%s>  \t", _("ARGS"), _("range")						);
+	printf( "\n%s:\n\t<%s>  \t", _("ARGS"), _("range")						);
 	marginprint( 0, 24, 79-24, _(
 		"is the pair of numbers separated by a '-' sign. In this pair, the first or second "
 		"or even both numbers can be omitted (one '-' remains) or one number can be specified "
@@ -854,26 +855,26 @@ int main( int argc, char *const *argv )
 			continue; // что делать с отдельным '-' не знаю... Пока ничего
 
 		if( !optproc( arg[0], &arg[1]) )
-			fprintf( stderr, "%s: %s\n", arg, _("Wrong parameter"));
+			fprintf( stderr, "%s:\t%s\n", arg, _("Incorrect option"));
 		/*
 		if( arg[1] )
 		{
 			if( !optproc( arg[0], &arg[1]) )
-				fprintf( stderr, "%s: %s\n", arg, _("Wrong parameter"));
+				fprintf( stderr, "%s:\t%s\n", arg, _("Incorrect option"));
 			continue;
 		}
 
 		if( i+1 >= argc )
 		{
 			if( !optproc( arg[0], "") )
-				fprintf( stderr, "%s: %s\n", arg, _("Wrong parameter"));
+				fprintf( stderr, "%s:\t%s\n", arg, _("Incorrect option"));
 			continue;
 		}
 		else
 		{
 			//fprintf( stderr, "!3 '%c'%c'\n", arg[0], *argv[i+1]);
 			if( !optproc( arg[0], argv[i+1]) )
-				fprintf( stderr, "%c: %s\n", arg[0], _("Wrong parameter"));
+				fprintf( stderr, "%c:\t%s\n", arg[0], _("Incorrect option"));
 			else
 				i++;
 			continue;

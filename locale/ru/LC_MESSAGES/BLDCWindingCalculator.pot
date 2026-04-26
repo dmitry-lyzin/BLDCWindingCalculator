@@ -39,18 +39,24 @@ msgstr ""
 "сбалансированных статоров с числом пазов от 3 до 45 и коэффициентом намотки "
 "более 0.6"
 
+msgid "Incorrect option"
+msgstr "Неправильная опция"
+
 msgid "It's not a number. Used by default"
 msgstr "Это не число. Подставим"
+
+msgid "Let's take the nearest suitable one"
+msgstr "Возьмём ближайшее подходящее"
 
 msgid "No schemes were found"
 msgstr "Никаких схем не найдено"
 
-#, c-format
-msgid "Number of %s must be divisible by %u!"
-msgstr "Число %s должно быть кратно %u!"
-
 msgid "OPTIONS"
 msgstr "ОПЦИИ"
+
+#, c-format
+msgid "The number of %s must be divisible by %u!"
+msgstr "Число %s не кратно %u!"
 
 msgid ""
 "The program to calculate the winding schemes of multi-pole electric motors "
@@ -66,9 +72,6 @@ msgstr "ИСПОЛЬЗОВАНИЕ"
 
 msgid "WF"
 msgstr "Kнамот"
-
-msgid "Wrong parameter"
-msgstr "Неверный параметр"
 
 msgid "balanc"
 msgstr "баланс"

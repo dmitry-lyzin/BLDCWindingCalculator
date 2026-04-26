@@ -763,7 +763,7 @@ int find_n_print_schemes( void )
 
 int usage( void)
 {
-	printf(	"\n%s\n\n%s:\n"
+	printf(	APPNAME " v0.1.0-alpha\nДмитрий Лызин <dmitry_lyzin@mail.ru>\n%s\n\n%s:\n"
 	      , _("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)")
 	      , _("USAGE")										);
 	int n = 79 - printf( "        " APPNAME " [-h]");
@@ -821,9 +821,10 @@ int main( int argc, char *const *argv )
 #ifdef __unix__
 	cchar *locale = LOCALE;
 #else
+	cchar *locale;
 	cchar *p = strrchr( argv[0], '\\');
-	assert(p);
-	cchar *locale = strf<1024>( "%.*s\\locale", int(p - argv[0]), argv[0]);
+	if(p)	locale = strf<1024>( "%.*s\\locale", int(p - argv[0]), argv[0]);
+	else	locale = ".\\locale";
 
 	SetConsoleOutputCP(65001);
 	if( isatty( STDERR_FILENO))

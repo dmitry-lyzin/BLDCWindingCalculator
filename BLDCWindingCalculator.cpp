@@ -117,15 +117,19 @@ STATIC_ASSERT( div_mul(333⁰, 3, 2) == 222⁰ );
 CE angle ε⁰ = 32*4;
 
 //--------------------------------------------------------------------------------------------------------------
-template <ui SIZE = 32>
+template <size_t SIZE = 32 - sizeof(ui)>
 struct strf
 {
 	strf		( cchar *fmt, ... ) {
 						va_list ap;
 						va_start( ap, fmt);
-						int n = vsnprintf( data, SIZE, fmt, ap);
+						size = vsnprintf( data, SIZE, fmt, ap);
+						if(size >= SIZE)
+						{
+							assert( !"not enough space in the buffer");
+							size = SIZE;
+						}
 						va_end( ap);
-						assert( n > -1 && n < SIZE);
 					    }
 	strf		( int		x ): strf( "%d",	x ) {}
 	strf		( ui		x ): strf( "%u",	x ) {}
@@ -135,12 +139,16 @@ struct strf
 	strf		( ulonglong	x ): strf( "%llu",	x ) {}
 	strf		( float		x ): strf( "%g",	x ) {}
 	strf		( double	x ): strf( "%g",	x ) {}
+CE	strf		( void		  ): size(0) { data[0] = 0; }
 
-CE	strf		( void	)	{ data[0] = 0;	}
-CE OP	cchar*		( void	) const	{ return  data; }
-CE OP	char*		( void	)	{ return  data; }
-CE	cchar&	OP *	( void	) const	{ return *data; }
-CE	char&	OP *	( void	)	{ return *data; }
+CE OP	cchar*		( void	) const	{ return  data;		}
+CE OP	char*		( void	)	{ return  data;		}
+CE OP const string_view	( void	) const	{ return{ data, size };	}
+CE OP	string_view	( void	)	{ return{ data, size };	}
+CE	cchar&	OP *	( void	) const	{ return *data;		}
+CE	char&	OP *	( void	)	{ return *data;		}
+
+	ui	size;
 	char	data	[ SIZE	];
 };
 
@@ -822,8 +830,8 @@ int main( int argc, char *const *argv )
 	cchar *locale = LOCALE;
 #else
 	cchar *locale;
-	cchar *p = strrchr( argv[0], '\\');
-	if(p)	locale = strf<1024>( "%.*s\\locale", int(p - argv[0]), argv[0]);
+	cchar *fp = strrchr( argv[0], '\\'); // полный путь к exe'шнику
+	if(fp)	locale = strf<1024>( "%.*s\\locale", int(fp - argv[0]), argv[0]);
 	else	locale = ".\\locale";
 
 	SetConsoleOutputCP(65001);
@@ -843,7 +851,24 @@ int main( int argc, char *const *argv )
 	textdomain		(APPNAME	);
 
 	if( 1 == argc )
-		return usage();
+	{
+		usage();
+		#ifndef __unix__
+			if( !fp && STDOUT_IS_A_TTY )
+			{
+				printf( _("\nWHAT TO DO RIGHT NOW:\n") );
+				marginprint( 8, 8, 79-8
+					, strf<1024>( _("Press CTRL-F until \"%s\" appears, add your "
+						"parameters (for example, \" p26 w0.8-\"), press ←┘ and joy. "
+						"Then just click ↑, edit the parameters, then ←┘, be happy "
+						"and continue in a circle until you get bored ;)")
+						, argv[0]
+						)
+					);
+			}
+		#endif
+		return EXIT_SUCCESS;
+	}
 
 	for( int i = 1; i < argc; i++)
 	{

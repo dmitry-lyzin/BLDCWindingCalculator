@@ -18,6 +18,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #, c-format
+msgid ""
+"\n"
+"WHAT TO DO RIGHT NOW:\n"
+msgstr ""
+"\n"
+"ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС\n"
+
+#, c-format
 msgid "%u scheme found\n"
 msgid_plural "%u schemes found\n"
 msgstr[0] "Найдена %u схема\n"
@@ -53,6 +61,17 @@ msgstr "Никаких схем не найдено"
 
 msgid "OPTIONS"
 msgstr "ОПЦИИ"
+
+#, c-format
+msgid ""
+"Press CTRL-F until \"%s\" appears, add your parameters (for example, \" p26 "
+"w0.8-\"), press ←┘ and joy. Then just click ↑, edit the parameters, then ←┘, "
+"be happy and continue in a circle until you get bored ;)"
+msgstr ""
+"Нажимайте CTRL-F пока не появится \"%s\", дописываете свои параметры "
+"(например \" p26 w0.8-\"), жмёте ←┘, любуетесь. Дальше просто нажимаете ↑, "
+"редактируете параметры, затем ←┘, любуетесь и дальше по кругу, пока не "
+"надоест ;)"
 
 #, c-format
 msgid "The number of %s must be divisible by %u!"

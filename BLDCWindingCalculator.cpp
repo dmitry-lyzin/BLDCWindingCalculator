@@ -213,6 +213,54 @@ STATIC_ASSERT( N("4321"	) == 4321	);
 	return str_to_num( str, x1);
 }
 
+enum Color { red, green, blue };
+
+void color_print( Color color, cchar *str )
+{
+	if( ! STDOUT_IS_A_TTY )
+	{
+		printf(str);
+		return;
+	}
+
+#ifdef __unix__
+	// ANSI escape color codes
+	static cchar *color_codes[3] =
+	{ "91" // Bright Red // "93" // Bright Yellow
+	, "92" // Bright Green
+	, "94" // Bright Blue // "96" // Bright Cyan
+	};
+
+	assert( ui(color) < size(color_codes) );
+	printf( "\033[%sm%s", color_codes[color], str);
+#else
+	static WORD attributes[3] =
+	{ FOREGROUND_INTENSITY	| FOREGROUND_RED
+	, FOREGROUND_INTENSITY	| FOREGROUND_GREEN
+	, FOREGROUND_INTENSITY	| FOREGROUND_BLUE
+	};
+
+	assert( ui(color) < size(attributes) );
+	SetConsoleTextAttribute( hConsole, attributes[color] );
+	printf( str);
+#endif
+}
+
+void color_print( Color color, cchar c )
+{
+	char str[] = { c, 0 };
+	color_print( color, str );
+}
+
+void color_print_reset()
+{
+#ifdef __unix__
+	printf( "\033[0m");
+#else
+	SetConsoleTextAttribute( hConsole, console_screen_buffer_info.wAttributes);
+#endif
+}
+
 //--------------------------------------------------------------------------------------------------------------
 struct Opt
 {
@@ -234,13 +282,18 @@ virtual	bool	load	( cchar *arg		)	= 0;
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_balans: Opt
 {
-enum	Sel						{ any = 0, yes = 1, no = 2				};
 CE	Opt_balans	( void			): Opt( 'b', "balanc", "stator balance"), sel(any) {}
-
+enum	Sel						{ any = 0, yes = 1, no = 2				};
 	Sel	sel;
 virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c[+|-|any]", chr };			}
 virtual	ui	test	( ui slots, ui poles	) cØnst { ui r = slots%2 + 1; return !sel || sel == r ? r : 0;	}
-virtual	void	print	( ui val		) cØnst	{ static cchar *c[]={"+","-"}; printf("%s", c[val-1]);	}
+virtual	void	print	( ui val		) cØnst
+	{
+		static Color cl[] = { green,	red	};
+		static cchar *c[] = { "√",	"×"	};
+		color_print( cl[val-1], c[val-1] );
+		color_print_reset();
+	}
 virtual	bool	load	( cchar *arg		) Ø
 	{
 		switch( arg[0])
@@ -503,7 +556,7 @@ STATIC	bool	test1	( ui slots, ui poles	)
 		return (a == b && a == c && A == B && A == C);
 	}
 STATIC	bool	test2	( ui slots, ui poles	)	{ return test0( slots, poles) == test1( slots, poles);	}
-virtual	ui	test	( ui slots, ui poles	) cØnst	{ return test0(slots, poles) ? pack(slots, poles) : 0;	}
+virtual	ui	test	( ui slots, ui poles	) cØnst	{ return test0( slots, poles) ? pack(slots, poles) : 0;	}
 virtual	strf<>	usage_s	( void			) cØnst	{ return { };						}
 virtual	void	usage_l	( void			) cØnst	{							}
 virtual	void	print	( ui val		) cØnst
@@ -550,6 +603,7 @@ virtual	void	print	( ui val		) cØnst
 				*p ^= ('a' ^ 'A');
 		}
 
+		// если схема не кончается фазой C...
 		if( fast_toupper( sxema[ slots-1]) != 'C')
 		{
 			// меняем фазы B и C местами
@@ -565,35 +619,10 @@ virtual	void	print	( ui val		) cØnst
 			return;
 		}
 
-#ifdef __unix__
 		for( ui i = 0; i < slots; sxema++, i++ )
-		{
-			// ANSI escape color codes
-			static cchar *color_codes[3] =
-			{ "91" // Bright Red // "93" // Bright Yellow
-			, "92" // Bright Green
-			, "94" // Bright Blue // "96" // Bright Cyan
-			};
+			color_print( Color(fast_toupper(*sxema)-'A'), *sxema);
 
-			assert( ui(fast_toupper(*sxema)-'A') < size(color_codes) );
-			printf( "\033[%sm%c", color_codes[ fast_toupper(*sxema)-'A'], *sxema);
-		}
-		printf( "\033[0m");
-#else
-		for( ui i = 0; i < slots; sxema++, i++ )
-		{
-			static WORD attributes[3] =
-			{ FOREGROUND_INTENSITY	| FOREGROUND_RED
-			, FOREGROUND_INTENSITY	| FOREGROUND_GREEN
-			, FOREGROUND_INTENSITY	| FOREGROUND_BLUE
-			};
-
-			assert( ui(fast_toupper(*sxema)-'A') < size(attributes) );
-			SetConsoleTextAttribute( hConsole, attributes[ fast_toupper(*sxema)-'A'] );
-			putchar( *sxema);
-		}
-		SetConsoleTextAttribute( hConsole, console_screen_buffer_info.wAttributes);
-#endif
+		color_print_reset();
 	}
 } print_sxema;
 #if DIV( тесты алгоритма поиска схемы намотки )
@@ -846,7 +875,7 @@ int main( int argc, char *const *argv )
 	}
 #endif
 	if( ! setlocale		(LC_MESSAGES, ""))	 // может LC_ALL ? Нет, десятичная запятая - зло!
-		perror( strf<1024>("setlocale(LC_MESSAGES, \"%s\"): ", getenv("LANG")) );
+		perror( strf<1024>("setlocale(LC_MESSAGES, \"%s\")", getenv("LANG")) );
 	bindtextdomain		(APPNAME, locale);
 	bind_textdomain_codeset	(APPNAME,"UTF-8");
 	textdomain		(APPNAME	);

@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: BLDCWindingCalculator 0.1\n"
+"Project-Id-Version: BLDCWindingCalculator\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-20 22:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -23,7 +23,7 @@ msgid ""
 "WHAT TO DO RIGHT NOW:\n"
 msgstr ""
 "\n"
-"ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС\n"
+"ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС:\n"
 
 #, c-format
 msgid "%u scheme found\n"

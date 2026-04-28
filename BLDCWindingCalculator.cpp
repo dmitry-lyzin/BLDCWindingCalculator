@@ -219,7 +219,7 @@ void color_print( Color color, cchar *str )
 {
 	if( ! STDOUT_IS_A_TTY )
 	{
-		printf(str);
+		printf( "%s", str);
 		return;
 	}
 
@@ -800,7 +800,7 @@ int find_n_print_schemes( void )
 
 int usage( void)
 {
-	printf(	APPNAME " v0.1.0-alpha\nДмитрий Лызин <dmitry_lyzin@mail.ru>\n%s\n\n%s:\n"
+	printf(	APPNAME " " VERSION "\nДмитрий Лызин <dmitry_lyzin@mail.ru>\n%s\n\n%s:\n"
 	      , _("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)")
 	      , _("USAGE")										);
 	int n = 79 - printf( "        " APPNAME " [-h]");
@@ -858,10 +858,10 @@ int main( int argc, char *const *argv )
 #ifdef __unix__
 	cchar *locale = LOCALE;
 #else
-	cchar *locale;
+	cchar *locale = ".\\locale";
 	cchar *fp = strrchr( argv[0], '\\'); // полный путь к exe'шнику
-	if(fp)	locale = strf<1024>( "%.*s\\locale", int(fp - argv[0]), argv[0]);
-	else	locale = ".\\locale";
+	if( fp )
+		locale = strf<1024>( "%.*s\\locale", int(fp - argv[0]), argv[0]);
 
 	SetConsoleOutputCP(65001);
 	if( isatty( STDERR_FILENO))

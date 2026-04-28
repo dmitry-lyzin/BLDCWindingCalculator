@@ -1,0 +1,1 @@
+@start "BLDCWindingCalculator" cmd /F:ON /U /K BLDCWindingCalculator.exe

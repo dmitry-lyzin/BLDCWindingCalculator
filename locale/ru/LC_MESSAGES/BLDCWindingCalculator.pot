@@ -65,7 +65,7 @@ msgstr "ОПЦИИ"
 #, c-format
 msgid ""
 "Press CTRL-F until \"%s\" appears, add your parameters (for example, \" p26 "
-"w0.8-\"), press ←┘ and joy. Then just click ↑, edit the parameters, then ←┘, "
+"w0.8-\"), press ←┘ and joy. Then just press ↑, edit the parameters, then ←┘, "
 "be happy and continue in a circle until you get bored ;)"
 msgstr ""
 "Нажимайте CTRL-F пока не появится \"%s\", дописываете свои параметры "

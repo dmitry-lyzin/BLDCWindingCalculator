@@ -845,7 +845,8 @@ int main( int argc, char *const *argv )
 		// SetConsoleMode( hConsole, ENABLE_VIRTUAL_TERMINAL_PROCESSING); // под Windows7 не работает
 	}
 #endif
-	if( ! setlocale		(LC_MESSAGES, "")) perror("setlocale(): "); // может LC_ALL ? Нет, десятичная запятая - зло!
+	if( ! setlocale		(LC_MESSAGES, ""))	 // может LC_ALL ? Нет, десятичная запятая - зло!
+		perror( strf<1024>("setlocale(LC_MESSAGES, \"%s\"): ", getenv("LANG")) );
 	bindtextdomain		(APPNAME, locale);
 	bind_textdomain_codeset	(APPNAME,"UTF-8");
 	textdomain		(APPNAME	);
@@ -860,7 +861,7 @@ int main( int argc, char *const *argv )
 				marginprint( 8, 8, 79-8
 					, strf<1024>( _("Press CTRL-F until \"%s\" appears, add your "
 						"parameters (for example, \" p26 w0.8-\"), press ←┘ and joy. "
-						"Then just click ↑, edit the parameters, then ←┘, be happy "
+						"Then just press ↑, edit the parameters, then ←┘, be happy "
 						"and continue in a circle until you get bored ;)")
 						, argv[0]
 						)

@@ -277,6 +277,11 @@ virtual	void	usage_l	( void			) const	{ printf("\t%s\t%s\n", &*usage_s(), _(long
 virtual	ui	test	( ui slots, ui poles	) const	= 0;
 virtual	void	print	( ui val		) const	= 0;
 virtual	bool	load	( cchar *arg		)	= 0;
+
+STATIC	auto	half = (sizeof(ui)*8 / 2);
+STATIC	ui	pack	( ui slots, ui poles	)	{ return (slots << half) + poles;		}
+STATIC	ui	slots	( ui val		)	{ return val >> half;				}
+STATIC	ui	poles	( ui val		)	{ return val & ~(ui(-1) << half);		}
 };
 
 //--------------------------------------------------------------------------------------------------------------
@@ -411,20 +416,70 @@ struct Print_config: Opt
 CE	Print_config	( char chr, cchar *shortname, cchar *longname): Opt( chr, shortname, longname) {}
 CE	Print_config	( void			): Opt( 0, "config", "configuration") {}
 
-STATIC	auto	half = (sizeof(ui)*8 / 2);
-STATIC	ui	pack	( ui slots, ui poles	)	{ return (slots << half) + poles;		}
-STATIC	ui	slots	( ui val		)	{ return val >> half;				}
-STATIC	ui	poles	( ui val		)	{ return val & ~(ui(-1) << half);		}
-
 virtual	ui	test	( ui slots, ui poles	) cØnst	{ return pack( slots, poles);			}
 virtual	void	print	( ui val		) cØnst	{ printf( "%u/%u", slots(val), poles(val) );	}
 virtual	bool	load	( cchar *arg		) Ø	{ return false;					}
-} print_config;
+};// print_config;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Opt_q			final: Print_config
+struct Opt_range_01: Opt_range
 {
-CE	Opt_q		( void			): Print_config( 'q', "q", "q = slots/poles/phases"), sample(0) {}
+CE	Opt_range_01	( char chr, cchar *shortname, cchar *longname)
+	: Opt_range( chr, shortname, longname, 0, scale) {}
+
+STATIC	ui	nuls	= 6;
+STATIC	ui	scale	= pow10( nuls);
+STATIC	ui	toscale	( double x		)	{ return ui((x + .5/scale) * scale); }
+
+virtual	void	print	( ui val		) cØnst
+	{
+		if( val < scale) printf( ".%0*d", nuls, val		);
+		else             printf( "%g", double(val) / scale	);
+	}
+virtual	bool	load	( cchar *arg		) Ø
+	{
+		double d_min = min; d_min /= scale;
+		double d_max = max; d_max /= scale;
+		ui x = num_sign_num( arg, '-', &d_min, &d_max);
+		min = toscale( d_min);
+		max = toscale( d_max);
+
+		switch( x )
+		{
+		case 0:	return false;
+		case 1:	max = min;
+		case 2:
+			if( d_min > 1. || d_max > 1. )
+			{
+				fprintf( stderr, "%c%s:\t%s > 1 ?\n", chr, arg, _(longname) );
+				exit( EXIT_FAILURE);
+			}
+			return true;
+		}
+		assert( false);
+		return false;
+	}
+};
+
+//--------------------------------------------------------------------------------------------------------------
+struct Opt_q			final: Opt_range_01
+{
+	CE	Opt_q	( void			): Opt_range_01( 'q', "q", "q = slots/poles/phases") {}
+virtual	ui	test	( ui slots, ui poles	) cØnst
+	{
+		slots /= 3;
+		ui nod = НОД( slots, poles);
+		slots /= nod;
+		poles /= nod;
+		return minmax(scale * slots / poles) ? pack(slots, poles) : 0;
+	}
+virtual	void	print	( ui val		) cØnst	{ printf( "%u/%u", slots(val), poles(val) );	}
+} opt_q;
+
+//--------------------------------------------------------------------------------------------------------------
+struct Opt_q_fraction		final: Print_config
+{
+CE	Opt_q_fraction	( void			): Print_config( 'Q', "q", "q = slots/poles/phases"), sample(0) {}
 
 	ui	sample;
 virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", chr, _("fraction") };	}
@@ -454,16 +509,12 @@ virtual	bool	load	( cchar *arg		) Ø
 		sample = pack( numerator/nod, denominator/nod );
 		return true;
 	}
-} opt_q;
+}; // opt_q_fraction;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Opt_winding_factor	final: Opt_range
+struct Opt_winding_factor	final: Opt_range_01
 {
-CE	Opt_winding_factor( void		): Opt_range( 'w', "WF", "winding factor", 0, scale) {}
-
-STATIC	ui	nuls	= 6;
-STATIC	ui	scale	= pow10( nuls);
-STATIC	ui	toscale	( double x		)	{ return ui((x + .5/scale) * scale); }
+CE	Opt_winding_factor( void		): Opt_range_01( 'w', "WF", "winding factor") {}
 
 virtual	ui	test	( ui slots, ui poles	) cØnst
 	{
@@ -493,34 +544,6 @@ virtual	ui	test	( ui slots, ui poles	) cØnst
 		}
 		res += double(2 - previous_EMF); // i == 0
 		return minmax( toscale( abs(res) / (slots * 2)) );
-	}
-virtual	void	print	( ui val		) cØnst
-	{
-		if( val < scale) printf( ".%0*d", nuls, val		);
-		else             printf( "%g", double(val) / scale	);
-	}
-virtual	bool	load	( cchar *arg		) Ø
-	{
-		double d_min = min; d_min /= scale;
-		double d_max = max; d_max /= scale;
-		ui x = num_sign_num( arg, '-', &d_min, &d_max);
-		min = toscale( d_min);
-		max = toscale( d_max);
-
-		switch( x )
-		{
-		case 0:	return false;
-		case 1:	max = min;
-		case 2:
-			if( d_min > 1. || d_max > 1. )
-			{
-				fprintf( stderr, "%c%s:\t%s > 1 ?\n", chr, arg, _(longname) );
-				exit( EXIT_FAILURE);
-			}
-			return true;
-		}
-		assert( false);
-		return false;
 	}
 } opt_winding_factor;
 

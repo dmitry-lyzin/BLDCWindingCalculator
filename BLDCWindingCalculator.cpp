@@ -800,7 +800,7 @@ int find_n_print_schemes( void )
 
 int usage( void)
 {
-	printf(	APPNAME " " VERSION "\nДмитрий Лызин <dmitry_lyzin@mail.ru>\n%s\n\n%s:\n"
+	printf(	APPNAME " v" VERSION "\nДмитрий Лызин <dmitry_lyzin@mail.ru>\n%s\n\n%s:\n"
 	      , _("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)")
 	      , _("USAGE")										);
 	int n = 79 - printf( "        " APPNAME " [-h]");

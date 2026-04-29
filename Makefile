@@ -1,5 +1,6 @@
 APPNAME	= BLDCWindingCalculator
-VERSION	= v0.1.0-alpha
+VERSION	= 0.1.0-alpha
+WINREL	= $(APPNAME)-$(VERSION)-win32.zip
 BIN	= /usr/local/bin
 LOCALE	= /usr/share/locale
 CXXFLAGS= -O3 -DNDEBUG -DAPPNAME=\"$(APPNAME)\" -DVERSION=\"$(VERSION)\" -DLOCALE=\"$(LOCALE)\" -s -std=c++20
@@ -30,11 +31,11 @@ locale/ru/LC_MESSAGES/$(APPNAME).pot: $(APPNAME).cpp
 %.mo: %.po
 	msgfmt --check --verbose --output-file $@ $<
 
-windows: Release/$(APPNAME)_$(VERSION).zip
+windows: Release/$(WINREL)
 
-Release/$(APPNAME)_$(VERSION).zip: Release/$(APPNAME).exe Release/$(APPNAME)ForNoob.cmd Release/locale/ru/LC_MESSAGES/$(APPNAME).mo
+Release/$(WINREL): Release/$(APPNAME).exe Release/$(APPNAME)ForNoob.cmd Release/locale/ru/LC_MESSAGES/$(APPNAME).mo
 	$(RM) $@
-	cmd /C cd Release && 7z a -r $(APPNAME)_$(VERSION).zip \
+	cmd /C cd Release && 7z a -r $(WINREL) \
 					$(APPNAME).exe \
 					$(APPNAME)ForNoob.cmd \
 					locale/ru/LC_MESSAGES/$(APPNAME).mo

@@ -65,12 +65,12 @@
 Если вы собираетесь положить exe'шник в папку, которая в *путях*, то не забудьте положить туда-же
 папку `locale`, иначе все сообщения программы будут на английском.
 
-- под linux/unix
+- под linux/unix всё просто:
 ```shell
-$ git clone https://github.com/dmitry-lyzin/BLDCWindingCalculator.git
-$ cd BLDCWindingCalculator
-$ make
-$ sudo make install
+git clone https://github.com/dmitry-lyzin/BLDCWindingCalculator.git
+cd BLDCWindingCalculator
+make
+sudo make install
 ```
 
 ## Опции запуска

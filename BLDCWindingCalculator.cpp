@@ -274,10 +274,9 @@ CE OP	bool		(			) const	{ return _;			}
 CE	bool	OP ==	( const Val &x		) const	{ return _ == x._;		}
 CE	bool	OP !=	( const Val &x		) const	{ return _ != x._;		}
 CE	bool	OP <	( const Val &x		) const	{ return _ <  x._;		}
-CE	bool	OP <=	( const Val &x		) const	{ return _ <= x._;		}
 CE	Val		( double x		): _( ui((x + .5/scale) * scale)	){}
 CE OP	double		(			) const	{ return double( _ ) / scale;	}
-CE	void	print_as_double	(		) const
+	void	doublef	(			) const
 	{
 		if( _ < scale)	printf( ".%0*d", nuls, _		);
 		else		printf( "%g", double( _ ) / scale	);
@@ -310,11 +309,11 @@ virtual	bool	load	( cchar *arg		)	= 0;
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_balans: Opt
 {
-CE	Opt_balans	( void			): Opt( 'b', "balanc", "stator balance"), sel(any) {}
-enum	Sel						{ any = 0, yes = 1, no = 2				};
-	Sel	sel;
+CE	Opt_balans	( void			): Opt( 'b', "balanc", "stator balance"), var(any) {}
+enum	Variant						{ any = 0, yes = 1, no = 2				};
+	Variant	var;
 virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c[+|-|any]", chr };			}
-virtual	Val	test	( ui slots, ui poles	) cØnst { ui r = slots%2+1; return{ !sel || sel == r ? r : 0 };	}
+virtual	Val	test	( ui slots, ui poles	) cØnst { ui r = slots%2+1; return{ !var || var == r ? r : 0 };	}
 virtual	void	print	( Val val		) cØnst
 	{
 		static Color cl[] = { green,	red	};
@@ -329,13 +328,13 @@ virtual	bool	load	( cchar *arg		) Ø
 		case  0 :
 		case '+':
 		case ' ':
-		case 'y': sel = yes;	return true;
+		case 'y': var = yes;	return true;
 
 		case '-':
-		case 'n': sel = no;	return true;
+		case 'n': var = no;	return true;
 
 		case 'a':
-		case 'x': sel = any;	return true;
+		case 'x': var = any;	return true;
 		default:		return false;
 		}
 		assert( false);
@@ -351,7 +350,7 @@ CE	Opt_range	( char chr, cchar *shortname, cchar *longname, Val _min, Val _max)
 
 	Val	min;
 	Val	max;
-CE	Val	minmax	( Val val		) const	{ return (min <= val && val <= max)? val: Val();}
+CE	Val	in_range( Val val		) const	{ return (max < val || val < min) ? Val() : val;}
 
 virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", chr, _("range") };		}
 virtual	void	print	( Val val		) cØnst	{ printf( "%u", val._);				}
@@ -423,14 +422,14 @@ virtual	bool	load	( cchar *arg		) Ø
 struct Opt_cogging		final: Opt_range
 {
 CE	Opt_cogging	( void			): Opt_range( 'c', "cogging", "cogging steps", 0u, MAXUINT) {}
-virtual	Val	test	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles));	}
+virtual	Val	test	( ui slots, ui poles	) cØnst	{ return in_range( НОК( slots, poles) );	}
 } opt_cogging;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_reduction		final: Opt_range
 {
 CE	Opt_reduction	( void			): Opt_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0u, MAXUINT) {}
-virtual	Val	test	( ui slots, ui poles	) cØnst	{ return minmax( НОК( slots, poles)/6);	}
+virtual	Val	test	( ui slots, ui poles	) cØnst	{ return in_range( НОК( slots, poles)/6 );	}
 } opt_reduct;
 
 //--------------------------------------------------------------------------------------------------------------
@@ -450,7 +449,7 @@ struct Opt_range_01: Opt_range
 CE	Opt_range_01	( char chr, cchar *shortname, cchar *longname)
 	: Opt_range( chr, shortname, longname, 0., 1.) {}
 
-virtual	void	print	( Val val		) cØnst	{ val.print_as_double();	}
+virtual	void	print	( Val val		) cØnst	{ val.doublef();	}
 virtual	bool	load	( cchar *arg		) Ø
 	{
 		double d_min = min;
@@ -486,7 +485,7 @@ virtual	Val	test	( ui slots, ui poles	) cØnst
 		ui nod = НОД( slots, poles);
 		slots /= nod;
 		poles /= nod;
-		return minmax( double(slots)/poles ) ? Val(slots, poles) : Val();
+		return in_range( double(slots)/poles ) ? Val(slots, poles) : Val();
 	}
 virtual	void	print	( Val val		) cØnst	{ printf( "%u/%u", val.slots(), val.poles() );	}
 } opt_q;
@@ -558,7 +557,7 @@ virtual	Val	test	( ui slots, ui poles	) cØnst
 			α += ρ;
 		}
 		res += double(2 - previous_EMF); // i == 0
-		return minmax( abs(res) / (slots * 2) );
+		return in_range( abs(res) / (slots * 2) );
 	}
 } opt_winding_factor;
 
@@ -730,10 +729,10 @@ void print_hr( ui len)
 
 int find_n_print_schemes( void )
 {
-	ui &slots_min = opt_slots.min._;
-	ui &slots_max = opt_slots.max._;
-	ui &poles_min = opt_poles.min._;
-	ui &poles_max = opt_poles.max._;
+	ui slots_min = opt_slots.min._;
+	ui slots_max = opt_slots.max._;
+	ui poles_min = opt_poles.min._;
+	ui poles_max = opt_poles.max._;
 
 	Val val0[size(OPTIONS)];
 	Val val	[size(OPTIONS)];
@@ -862,12 +861,12 @@ int usage( void)
 		"with a number of slots from 3 to 45 and a winding factor of more than 0.6")		);
 	printf( "\n> " APPNAME " p46 b+ s3-45 w0.6-\n"							);
 
-	opt_slots.min._ = 3;
-	opt_slots.max._ = 45;
-	opt_poles.min._ = 46;
+	opt_slots.min = 3;
+	opt_slots.max = 45;
+	opt_poles.min = 46;
 	opt_poles.max = opt_poles.min;
-	opt_winding_factor.min._ = 600000;
-	opt_balans.sel = Opt_balans::yes;
+	opt_winding_factor.min = 0.6;
+	opt_balans.var = Opt_balans::yes;
 
 	find_n_print_schemes();
 

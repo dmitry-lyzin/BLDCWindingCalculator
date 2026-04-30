@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assert.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #define _INTL_NO_DEFINE_MACRO_FPRINTF	1
@@ -421,14 +422,14 @@ virtual	bool	load	( cchar *arg		) Ø
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_cogging		final: Opt_range
 {
-CE	Opt_cogging	( void			): Opt_range( 'c', "cogging", "cogging steps", 0u, MAXUINT) {}
+CE	Opt_cogging	( void			): Opt_range( 'c', "cogging", "cogging steps", 0u, UINT_MAX) {}
 virtual	Val	test	( ui slots, ui poles	) cØnst	{ return in_range( НОК( slots, poles) );	}
 } opt_cogging;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_reduction		final: Opt_range
 {
-CE	Opt_reduction	( void			): Opt_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0u, MAXUINT) {}
+CE	Opt_reduction	( void			): Opt_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0u, UINT_MAX) {}
 virtual	Val	test	( ui slots, ui poles	) cØnst	{ return in_range( НОК( slots, poles)/6 );	}
 } opt_reduct;
 

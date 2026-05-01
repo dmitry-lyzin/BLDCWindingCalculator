@@ -11,13 +11,13 @@
 
 Вводим в командной строке:
 ```shell
-> BLDCWindingCalculator.exe p22-26 s3-50 w0.8-
+BLDCWindingCalculator p22-26 s3-50 w0.8-
 ```
 
 Что значит: а поищи-ка нам все варианты схем где полюсов ротора от 22 до 26, пазов в статоре от 3 до 50
 и чтоб коэффициент намотки (winding factor) был больше 0.8
 
-![BLDCWindingCalculator.exe p22-26 s3-50 w0.8-](img/p22-26_s3-50_w0.8-.png)
+![BLDCWindingCalculator p22-26 s3-50 w0.8-](img/p22-26_s3-50_w0.8-.png)
 
 ## Ещё пример использования
 Представим, в неком моторе Вы решили заменить магниты (старые перегрелись, заржавели, итд, их было 60).
@@ -26,7 +26,7 @@
 
 Вводим в командной строке:
 ```shell
-> BLDCWindingCalculator s54 w0.9-
+BLDCWindingCalculator s54 w0.9-
 ```
 что значит: искать схемы с количеством пазов 54 и коэффициентом намотки
 (winding factor) больше 0.9
@@ -36,14 +36,14 @@
 чё-то много, ужесточим, пусть коэффициент намотки будет больше 0.94
 (чтоб старая схема в список тоже попадала)
 ```shell
-> BLDCWindingCalculator s54 w0.94-
+BLDCWindingCalculator s54 w0.94-
 ```
 
 ![BLDCWindingCalculator s54 w0.94-](img/s54_w0.94-.png)
 
 а что если поставить коэффициент намотки точно 0.945214, как у старой схемы
 ```shell
-> BLDCWindingCalculator s54 w0.945214
+BLDCWindingCalculator s54 w0.945214
 ```
 
 ![BLDCWindingCalculator s54 w0.945214](img/s54_w0.945214.png)

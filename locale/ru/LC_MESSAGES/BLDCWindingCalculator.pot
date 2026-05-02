@@ -96,10 +96,10 @@ msgid "balanc"
 msgstr "баланс"
 
 msgid "cogging"
-msgstr "рывков"
+msgstr "залипов"
 
 msgid "cogging steps"
-msgstr "рывков на круг"
+msgstr "магнитных залипаний"
 
 msgid "config"
 msgstr "конфиг"

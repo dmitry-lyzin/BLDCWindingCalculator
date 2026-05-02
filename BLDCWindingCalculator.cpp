@@ -29,12 +29,19 @@
 #define CE	constexpr
 #define OP	operator
 
+#ifdef NDEBUG
+#	define IN_DEBUG(...)
+#else
+#	define IN_DEBUG(...) __VA_ARGS__
+#endif
+
 using ui	= unsigned int;
 using ulong	= unsigned long;
 using ulonglong	= unsigned long long;
 using angle	= unsigned long long;
 using cchar	= const char;
 using Complex	= std::complex< double>;
+using cstring_view = const std::string_view;
 using std::swap;
 using std::size;
 using std::string_view;
@@ -114,8 +121,8 @@ STATIC_ASSERT( 300⁰/3*2	== 200⁰ );
 STATIC_ASSERT( div_mul(333⁰, 3, 2) == 222⁰ );
 #endif
 
-// очень маленький угол
-CE angle ε⁰ = 32*4;
+// очень маленький угол, около 0.00000012⁰
+CE angle ε⁰ = size(BUF)/2;
 
 //--------------------------------------------------------------------------------------------------------------
 template <size_t SIZE = 32 - sizeof(ui)>
@@ -144,7 +151,7 @@ CE	strf		( void		  ): size(0) { data[0] = 0; }
 
 CE OP	cchar*		( void	) const	{ return  data;		}
 CE OP	char*		( void	)	{ return  data;		}
-CE OP const string_view	( void	) const	{ return{ data, size };	}
+CE OP	cstring_view	( void	) const	{ return{ data, size };	}
 CE OP	string_view	( void	)	{ return{ data, size };	}
 CE	cchar&	OP *	( void	) const	{ return *data;		}
 CE	char&	OP *	( void	)	{ return *data;		}
@@ -610,16 +617,16 @@ virtual	void	print	( Val val		) cØnst
 
 		char *sxema = BUF;
 		angle α = 30⁰ + ε⁰;
-		ui a = 0, b = 0, c = 0, A = 0, B = 0, C = 0;
+		IN_DEBUG( ui a = 0, b = 0, c = 0, A = 0, B = 0, C = 0; )
 
 		for( ui i = 0; i < slots; i++ )
 		{
-			     if( α <  60⁰ ) { *sxema++ = 'A'; A++; }
-			else if( α < 120⁰ ) { *sxema++ = 'b'; b++; }
-			else if( α < 180⁰ ) { *sxema++ = 'C'; C++; }
-			else if( α < 240⁰ ) { *sxema++ = 'a'; a++; }
-			else if( α < 300⁰ ) { *sxema++ = 'B'; B++; }
-			else                { *sxema++ = 'c'; c++; }
+			     if( α <  60⁰ ) { *sxema++ = 'A'; IN_DEBUG( A++; ) }
+			else if( α < 120⁰ ) { *sxema++ = 'b'; IN_DEBUG( b++; ) }
+			else if( α < 180⁰ ) { *sxema++ = 'C'; IN_DEBUG( C++; ) }
+			else if( α < 240⁰ ) { *sxema++ = 'a'; IN_DEBUG( a++; ) }
+			else if( α < 300⁰ ) { *sxema++ = 'B'; IN_DEBUG( B++; ) }
+			else                { *sxema++ = 'c'; IN_DEBUG( c++; ) }
 
 			α += ρ;
 		}
@@ -664,6 +671,23 @@ virtual	void	print	( Val val		) cØnst
 	}
 } print_sxema;
 #if DIV( тесты алгоритма поиска схемы намотки )
+STATIC_ASSERT( Print_sxema::test2( 156,	58)  );
+STATIC_ASSERT( Print_sxema::test2( 156,	370) );
+STATIC_ASSERT( Print_sxema::test2( 168,	62)  );
+STATIC_ASSERT( Print_sxema::test2( 300,	110) );
+STATIC_ASSERT( Print_sxema::test2( 300,	410) );
+STATIC_ASSERT( Print_sxema::test2( 312,	116) );
+STATIC_ASSERT( Print_sxema::test2( 312,	466) );
+STATIC_ASSERT( Print_sxema::test2( 324,	174) );
+STATIC_ASSERT( Print_sxema::test2( 360,	132) );
+STATIC_ASSERT( Print_sxema::test2( 360,	494) );
+STATIC_ASSERT( Print_sxema::test2( 372,	230) );
+STATIC_ASSERT( Print_sxema::test2( 372,	418) );
+STATIC_ASSERT( Print_sxema::test2( 396,	146) );
+STATIC_ASSERT( Print_sxema::test2( 396,	494) );
+STATIC_ASSERT( Print_sxema::test2( 408,	140) );
+STATIC_ASSERT( Print_sxema::test2( 408,	500) );
+STATIC_ASSERT( Print_sxema::test2( 420,	154) );
 STATIC_ASSERT( Print_sxema::test2( 24, 18) );
 STATIC_ASSERT( Print_sxema::test2( 24, 20) );
 STATIC_ASSERT( Print_sxema::test2( 24, 22) );

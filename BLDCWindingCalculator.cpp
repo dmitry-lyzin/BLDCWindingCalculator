@@ -35,6 +35,12 @@
 #	define IN_DEBUG(...) __VA_ARGS__
 #endif
 
+#ifdef __GNUC__
+#	define GNUC_EXT(...) __VA_ARGS__
+#else
+#	define GNUC_EXT(...)
+#endif
+
 using ui	= unsigned int;
 using ulong	= unsigned long;
 using ulonglong	= unsigned long long;
@@ -128,7 +134,7 @@ CE angle ε⁰ = size(SXEMABUF);
 template <size_t SIZE = 32 - sizeof(ui)>
 struct strf
 {
-	strf		( cchar *fmt, ... ) __attribute__ ((format( printf, 2, 3)))
+	strf		( cchar *fmt, ... ) GNUC_EXT( __attribute__ ((format( printf, 2, 3))))
 					{
 						va_list ap;
 						va_start( ap, fmt);

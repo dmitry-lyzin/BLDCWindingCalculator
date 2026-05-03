@@ -3,7 +3,7 @@ VERSION	= 0.1.0-alpha
 WINREL	= $(APPNAME)-$(VERSION)-win32.zip
 BIN	= /usr/local/bin
 LOCALE	= /usr/share/locale
-CXXFLAGS= -O3 -DNDEBUG -DAPPNAME=\"$(APPNAME)\" -DVERSION=\"$(VERSION)\" -DLOCALE=\"$(LOCALE)\" -s -std=c++20
+CXXFLAGS= -O3 -DNDEBUG -DAPPNAME=\"$(APPNAME)\" -DVERSION=\"$(VERSION)\" -DLOCALE=\"$(LOCALE)\" -s -std=c++20 -Wno-literal-suffix
 TARGETS	= $(APPNAME) locale/ru/LC_MESSAGES/$(APPNAME).po locale/ru/LC_MESSAGES/$(APPNAME).mo
 CP	= "C:\Program Files\Git\usr\bin\cp.exe"
 

@@ -63,7 +63,7 @@ using std::string_view;
 #endif
 
 bool	STDOUT_IS_A_TTY = false;
-char	BUF[1024];
+char	SXEMABUF[1024];
 
 inline cchar *_( cchar *msgid)
 {
@@ -121,24 +121,25 @@ STATIC_ASSERT( 300⁰/3*2	== 200⁰ );
 STATIC_ASSERT( div_mul(333⁰, 3, 2) == 222⁰ );
 #endif
 
-// очень маленький угол, около 0.00000012⁰
-CE angle ε⁰ = size(BUF)/2;
+// очень маленький угол, около 0.00000024⁰
+CE angle ε⁰ = size(SXEMABUF);
 
 //--------------------------------------------------------------------------------------------------------------
 template <size_t SIZE = 32 - sizeof(ui)>
 struct strf
 {
-	strf		( cchar *fmt, ... ) {
+	strf		( cchar *fmt, ... ) __attribute__ ((format( printf, 2, 3)))
+					{
 						va_list ap;
 						va_start( ap, fmt);
 						size = vsnprintf( data, SIZE, fmt, ap);
+						va_end( ap);
 						if(size >= SIZE)
 						{
 							assert( !"not enough space in the buffer");
 							size = SIZE;
 						}
-						va_end( ap);
-					    }
+					}
 	strf		( int		x ): strf( "%d",	x ) {}
 	strf		( ui		x ): strf( "%u",	x ) {}
 	strf		( long		x ): strf( "%ld",	x ) {}
@@ -416,9 +417,9 @@ virtual	bool	load	( cchar *arg		) Ø
 		if( !Opt_range_step::load( arg))
 			return false;
 
-		if( max._ >= size(BUF)/2 )
+		if( max._ >= size(SXEMABUF)/2 )
 		{
-			fprintf( stderr, "%c%s:\t%s (> %u)!\n", chr, arg, _("Too many slots"), ui( size( BUF)) / 2);
+			fprintf( stderr, "%c%s:\t%s (> %u)!\n", chr, arg, _("Too many slots"), ui( size(SXEMABUF)/2) );
 			exit( EXIT_FAILURE);
 		}
 
@@ -615,7 +616,7 @@ virtual	void	print	( Val val		) cØnst
 
 		angle ρ = div_mul( 180⁰, slots, poles);
 
-		char *sxema = BUF;
+		char *sxema = SXEMABUF;
 		angle α = 30⁰ + ε⁰;
 		IN_DEBUG( ui a = 0, b = 0, c = 0, A = 0, B = 0, C = 0; )
 
@@ -634,7 +635,7 @@ virtual	void	print	( Val val		) cØnst
 		assert( a == b && a == c && A == B && A == C);
 
 		//printf("\t\t%.*s\n", slots, BUF);
-		memcpy( sxema, BUF, slots);
+		memcpy( sxema, SXEMABUF, slots);
 		// "прокручиваем" схему, чтоб она не кончалась фазой А
 		while( fast_toupper(*--sxema) == 'A')
 			{}

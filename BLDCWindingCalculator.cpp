@@ -47,7 +47,6 @@ using ulonglong	= unsigned long long;
 using angle	= unsigned long long;
 using cchar	= const char;
 using Complex	= std::complex< double>;
-using cstring_view = const std::string_view;
 using std::swap;
 using std::size;
 using std::string_view;
@@ -156,11 +155,8 @@ struct strf
 	strf		( double	x ): strf( "%g",	x ) {}
 CE	strf		( void		  ): size(0) { data[0] = 0; }
 
-CE OP	cchar*		( void	) const	{ return  data;		}
 CE OP	char*		( void	)	{ return  data;		}
-CE OP	cstring_view	( void	) const	{ return{ data, size };	}
 CE OP	string_view	( void	)	{ return{ data, size };	}
-CE	cchar&	OP *	( void	) const	{ return *data;		}
 CE	char&	OP *	( void	)	{ return *data;		}
 
 	ui	size;
@@ -277,28 +273,39 @@ void color_print_reset()
 }
 
 //--------------------------------------------------------------------------------------------------------------
-struct Val
+union Val
 {
-CE	Val		(			): _( 0					){}
-CE	Val		( ui x			): _( x					){}
-CE	Val		( int x			): _( x					){}
-CE	Val		( ui slots, ui poles	): _( (slots << half) + poles		){}
-CE	ui	slots	(			) const	{ return _ >> half;		}
-CE	ui	poles	(			) const	{ return _ & ~(ui(-1) << half);	}
-CE OP	bool		(			) const	{ return _;			}
-CE	bool	OP ==	( const Val &x		) const	{ return _ == x._;		}
-CE	bool	OP !=	( const Val &x		) const	{ return _ != x._;		}
-CE	bool	OP <	( const Val &x		) const	{ return _ <  x._;		}
-CE	Val		( double x		): _( ui((x + .5/scale) * scale)	){}
-CE OP	double		(			) const	{ return double( _ ) / scale;	}
+CE	Val		(			): u( 0					){}
+CE OP	bool		(			) const	{ return u;			}
+CE	bool	OP ==	( const Val &x		) const	{ return u == x.u;		}
+CE	bool	OP !=	( const Val &x		) const	{ return u != x.u;		}
+CE	bool	OP <	( const Val &x		) const	{ return u <  x.u;		}
+
+CE	Val		( ui x			): u( x					){}
+CE	Val		( int x			): u( x					){}
+CE OP	ui		(			) const	{ return u;			}
+CE	ui*	OP &	(			)	{ return & u;			}
+
+CE	Val		( ui slots, ui poles	): conf{ slots, poles			}{}
+CE	ui	slots	(			) const	{ return conf.slots;		}
+CE	ui	poles	(			) const	{ return conf.poles;		}
+
+CE	Val		( double x		): u( ui((x + .5/scale) * scale)	){}
+CE OP	double		(			) const	{ return double(u) / scale;	}
 	void	doublef	(			) const
 	{
-		if( _ < scale)	printf( ".%0*d", nuls, _		);
-		else		printf( "%g", double( _ ) / scale	);
+		if( u < scale)	printf( ".%0*d", nuls, u	);
+		else		printf( "%g", double(u) / scale	);
 	}
-	ui	_;
+
 private:
-STATIC	auto	half	= (sizeof(ui)*8 / 2);
+	ui	u;
+	struct
+	{
+		ui	slots:(sizeof(u)*8 / 2);
+		ui	poles:(sizeof(u)*8 / 2);
+	} conf;
+
 STATIC	ui	nuls	= 6;
 STATIC	ui	scale	= pow10( nuls);
 };
@@ -333,7 +340,7 @@ virtual	void	print	( Val val		) cØnst
 	{
 		static Color cl[] = { green,	red	};
 		static cchar *c[] = { "√",	"×"	};
-		color_print( cl[val._-1], c[val._-1] );
+		color_print( cl[ui(val)-1], c[ui(val)-1] );
 		color_print_reset();
 	}
 virtual	bool	load	( cchar *arg		) Ø
@@ -368,10 +375,10 @@ CE	Opt_range	( char chr, cchar *shortname, cchar *longname, Val _min, Val _max)
 CE	Val	in_range( Val val		) const	{ return (max < val || val < min) ? Val() : val;}
 
 virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", chr, _("range") };		}
-virtual	void	print	( Val val		) cØnst	{ printf( "%u", val._);				}
+virtual	void	print	( Val val		) cØnst	{ printf( "%u", ui(val) );			}
 virtual	bool	load	( cchar *arg		) Ø
 	{
-		switch( num_sign_num( arg, '-', &min._, &max._))
+		switch( num_sign_num( arg, '-', &min, &max))
 		{
 		case 0:	return false;
 		case 1:	max = min;
@@ -393,12 +400,12 @@ virtual	bool	load	( cchar *arg	)
 	{
 		if( !Opt_range::load( arg))
 			return false;
-		if( step && ( ! min || min._ % step) )
+		if( step && ( ! min || ui(min) % step) )
 		{
 			fprintf( stderr, "%c%s:\t", chr, arg);
 			fprintf( stderr, _("The number of %s must be divisible by %u!"), _(longname), step );
-			min._ -= min._ % step;
-			fprintf( stderr, "\n\t%s: %u\n", _("Let's take the nearest suitable one"), min._ );
+			min = ui(min) - ui(min) % step;
+			fprintf( stderr, "\n\t%s: %u\n", _("Let's take the nearest suitable one"), ui(min) );
 			return false;
 		}
 
@@ -423,7 +430,7 @@ virtual	bool	load	( cchar *arg		) Ø
 		if( !Opt_range_step::load( arg))
 			return false;
 
-		if( max._ >= size(SXEMABUF)/2 )
+		if( ui(max) >= size(SXEMABUF)/2 )
 		{
 			fprintf( stderr, "%c%s:\t%s (> %u)!\n", chr, arg, _("Too many slots"), ui( size(SXEMABUF)/2) );
 			exit( EXIT_FAILURE);
@@ -761,10 +768,10 @@ void print_hr( ui len)
 
 int find_n_print_schemes( void )
 {
-	ui slots_min = opt_slots.min._;
-	ui slots_max = opt_slots.max._;
-	ui poles_min = opt_poles.min._;
-	ui poles_max = opt_poles.max._;
+	ui slots_min = opt_slots.min;
+	ui slots_max = opt_slots.max;
+	ui poles_min = opt_poles.min;
+	ui poles_max = opt_poles.max;
 
 	Val val0[size(OPTIONS)];
 	Val val	[size(OPTIONS)];
@@ -823,7 +830,7 @@ int find_n_print_schemes( void )
 			printf( "%s\t", _(OPTIONS[i]->shortname));
 	}
 	printf( "\n");
-	ui hr_len = val0[slots_col]._;
+	ui hr_len = val0[slots_col];
 	for( ui i = 0; i < size(OPTIONS)-1; i++)
 	{
 		if( OPTIONS[i]->column )

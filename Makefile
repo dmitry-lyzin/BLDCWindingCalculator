@@ -1,5 +1,5 @@
 APPNAME	= BLDCWindingCalculator
-VERSION	= 0.1.0-alpha
+VERSION	= 0.2.0-alpha
 WINREL	= $(APPNAME)-$(VERSION)-win32.zip
 BIN	= /usr/local/bin
 LOCALE	= /usr/share/locale

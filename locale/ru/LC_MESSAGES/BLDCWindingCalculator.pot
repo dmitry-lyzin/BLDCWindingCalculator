@@ -122,6 +122,12 @@ msgstr ""
 "можно опустить (будет один '-') или указать одно (типа диапазон из одного "
 "числа)"
 
+msgid "layer"
+msgstr "уровней"
+
+msgid "layer winding"
+msgstr "уровень намотки"
+
 msgid "magnet poles"
 msgstr "магнитных полюсов ротора"
 

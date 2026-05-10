@@ -123,10 +123,10 @@ msgstr ""
 "числа)"
 
 msgid "layer"
-msgstr "уровней"
+msgstr "слоёв"
 
 msgid "layer winding"
-msgstr "уровень намотки"
+msgstr "слойные обмотки"
 
 msgid "magnet poles"
 msgstr "магнитных полюсов ротора"

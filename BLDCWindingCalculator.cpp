@@ -484,15 +484,11 @@ virtual	Val	test	( ui slots, ui poles, ui) cØnst	{ return in_range( НОК( slo
 } opt_reduct;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Print_config: Opt
+struct Print_only: Opt
 {
-CE	Print_config	( char chr, cchar *shortname, cchar *longname): Opt( chr, shortname, longname) {}
-CE	Print_config	( void			): Opt( 0, "config", "configuration") {}
-
-virtual	Val	test	( ui slots,ui poles,ui l) cØnst	{ return { slots, poles, l };			}
-virtual	void	print	( Val val		) cØnst	{ printf( "%u/%u", val.slots(), val.poles() );	}
-virtual	bool	load	( cchar *arg		) Ø	{ return false;					}
-};// print_config;
+CE	Print_only	( cchar *shortname, cchar *longname	): Opt( 0, shortname, longname) {}
+virtual	bool	load	( cchar *arg				) Ø	{ return false;		}
+};
 
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_range_01: Opt_range
@@ -529,52 +525,20 @@ virtual	bool	load	( cchar *arg		) Ø
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_q			final: Opt_range_01
 {
-	CE	Opt_q	( void			): Opt_range_01( 'q', "q", "q = slots/poles/phases") {}
-virtual	Val	test	( ui slots, ui poles, ui) cØnst
-	{
-		slots /= m;
-		ui nod = НОД( slots, poles);
-		slots /= nod;
-		poles /= nod;
-		return in_range( double(slots)/poles ) ? Val(slots, poles, 0) : Val();
-	}
-virtual	void	print	( Val val		) cØnst	{ printf( "%u/%u", val.slots(), val.poles() );	}
+	CE	Opt_q	( void			): Opt_range_01( 'q', "q", "slots/poles/phases (q)") {}
+virtual	Val	test	( ui slots, ui poles, ui) cØnst	{ return in_range( double(slots/m)/poles );	}
 } opt_q;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Opt_q_fraction		final: Print_config
+struct Print_q_fraction		final: Print_only
 {
-CE	Opt_q_fraction	( void			): Print_config( 'Q', "q", "q = slots/poles/phases"), sample() {}
-
-	Val	sample;
-virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", chr, _("fraction") };	}
-virtual	Val	test	( ui slots, ui poles, ui) cØnst
-	{
-		slots /= m;
-		ui nod = НОД( slots, poles);
-		Val val = { slots/nod, poles/nod, 0 };
-		if( !sample || val == sample )
-			return val;
-		return Val();
-	}
-virtual	bool	load	( cchar *arg		) Ø
-	{
-		ui numerator	= 0;
-		ui denominator	= 1;
-
-		num_sign_num( arg, '/', &numerator, &denominator);
-
-		if( !numerator || !denominator )
-		{
-			fprintf( stderr, "%c%s:\t%s %s = 0?\n", chr, arg, _(longname), _(shortname));
-			exit( EXIT_FAILURE);
-		}
-
-		ui nod = НОД( numerator, denominator);
-		sample = { numerator/nod, denominator/nod, 0 };
-		return true;
-	}
-}; // opt_q_fraction;
+CE	Print_q_fraction( void			): Print_only( "q", "fraction") {}
+virtual	Val	test	( ui slots, ui poles, ui) cØnst	{ slots /= m
+							; ui nod = НОД( slots, poles)
+							; return { slots/nod, poles/nod, 0 };
+							}
+virtual	void	print	( Val val		) cØnst	{ printf( "%u/%u", val.slots(), val.poles() );	}
+} print_q_fraction;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_winding_factor	final: Opt_range_01
@@ -625,9 +589,9 @@ static	double	calcWF	( ui slots, ui poles, ui layers	)
 } opt_winding_factor;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Print_sxema		final: Print_config
+struct Print_sxema		final: Print_only
 {
-CE	Print_sxema	( void			): Print_config( 0, "winding scheme", "winding scheme") {}
+CE	Print_sxema	( void			): Print_only( "winding scheme", "winding scheme") {}
 STATIC	bool	test0	( ui slots, ui poles	)	{ return (poles / НОД( slots/m, poles)) % m;		}
 STATIC	bool	test1	( ui slots, ui poles	)
 	{
@@ -662,8 +626,6 @@ virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
 		if( ! test0( slots, poles) )	return Val();
 						return Val( slots, poles, layers);
 	}
-//virtual	strf<>	usage_s	( void			) cØnst	{ return { };						}
-//virtual	void	usage_l	( void			) cØnst	{							}
 virtual	void	print	( Val val		) cØnst
 	{
 		ui layers = val.layers();
@@ -789,6 +751,7 @@ Opt *OPTIONS[] = // массив всех опций
 , &opt_balans
 , &opt_cogging
 , &opt_q
+, &print_q_fraction
 , &opt_winding_factor
 , &print_sxema
 };

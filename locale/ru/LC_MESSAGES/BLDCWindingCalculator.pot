@@ -111,7 +111,7 @@ msgid "display this help and exit"
 msgstr "выдать эту подсказку и сдохнуть"
 
 msgid "fraction"
-msgstr "дробь"
+msgstr "дробью"
 
 msgid ""
 "is the pair of numbers separated by a '-' sign. In this pair, the first or "
@@ -140,9 +140,6 @@ msgstr "полюсов"
 msgid "q"
 msgstr "q"
 
-msgid "q = slots/poles/phases"
-msgstr "q = число пазов на полюс и фазу"
-
 msgid "range"
 msgstr "диапазон"
 
@@ -155,6 +152,9 @@ msgstr "пазов"
 
 msgid "slots in the stator"
 msgstr "пазов (полюсов) статора"
+
+msgid "slots/poles/phases (q)"
+msgstr "число пазов на полюс и фазу (q)"
 
 msgid "stator balance"
 msgstr "сбалансированность статора"

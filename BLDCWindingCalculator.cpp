@@ -71,6 +71,10 @@ using std::string_view;
 bool	STDOUT_IS_A_TTY = false;
 char	SXEMABUF[1024];
 
+double	CE π = M_PI;
+ui	CE m = 3;		// число фаз
+angle	CE ε⁰ = size(SXEMABUF);	// очень маленький угол, около 0.00000024⁰, "добавка" для компенсации потерь при делении на 3
+
 inline cchar *_( cchar *msgid)
 {
 	return gettext( msgid);
@@ -126,9 +130,6 @@ STATIC_ASSERT( 300⁰/3*2	== 200⁰ );
 //STATIC_ASSERT( 333⁰/3*2	== 222⁰ );
 STATIC_ASSERT( div_mul(333⁰, 3, 2) == 222⁰ );
 #endif
-
-// очень маленький угол, около 0.00000024⁰, "добавка" для компенсации потерь при делении на 3
-CE angle ε⁰ = size(SXEMABUF);
 
 //--------------------------------------------------------------------------------------------------------------
 template <size_t SIZE = 32 - sizeof(ui)>
@@ -451,7 +452,7 @@ virtual	Val	test	( ui, ui poles, ui	) cØnst	{ return poles; }
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_slots		final: Opt_range_step
 {
-CE	Opt_slots	( void			): Opt_range_step( 's', "slots", "slots in the stator", 3, 99, 3) {}
+CE	Opt_slots	( void			): Opt_range_step( 's', "slots", "slots in the stator", m, 99, m) {}
 virtual	Val	test	( ui slots, ui, ui	) cØnst	{ return slots; }
 virtual	bool	load	( cchar *arg		) Ø
 	{
@@ -528,14 +529,14 @@ virtual	bool	load	( cchar *arg		) Ø
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_q			final: Opt_range_01
 {
-	CE	Opt_q	( void				): Opt_range_01( 'q', "q", "q = slots/poles/phases") {}
-virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
+	CE	Opt_q	( void			): Opt_range_01( 'q', "q", "q = slots/poles/phases") {}
+virtual	Val	test	( ui slots, ui poles, ui) cØnst
 	{
-		slots /= 3;
+		slots /= m;
 		ui nod = НОД( slots, poles);
 		slots /= nod;
 		poles /= nod;
-		return in_range( double(slots)/poles ) ? Val(slots, poles, layers) : Val();
+		return in_range( double(slots)/poles ) ? Val(slots, poles, 0) : Val();
 	}
 virtual	void	print	( Val val		) cØnst	{ printf( "%u/%u", val.slots(), val.poles() );	}
 } opt_q;
@@ -547,11 +548,11 @@ CE	Opt_q_fraction	( void			): Print_config( 'Q', "q", "q = slots/poles/phases"),
 
 	Val	sample;
 virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c<%s>", chr, _("fraction") };	}
-virtual	Val	test	( ui slots,ui poles,ui l) cØnst
+virtual	Val	test	( ui slots, ui poles, ui) cØnst
 	{
-		slots /= 3;
+		slots /= m;
 		ui nod = НОД( slots, poles);
-		Val val = { slots/nod, poles/nod, l };
+		Val val = { slots/nod, poles/nod, 0 };
 		if( !sample || val == sample )
 			return val;
 		return Val();
@@ -587,16 +588,16 @@ static	double	calcWF	( ui slots, ui poles, ui layers	)
 		if(layers == 1)
 			isSPS = 1;
 
-		Complex	Δâ = std::polar( 1., M_PI / slots * poles );
+		Complex	Δâ = std::polar( 1., π / slots * poles );
 		angle	Δα = div_mul( 180⁰, slots, poles);
 		Complex	â  = 1;
 		angle	α  = 30⁰ + ε⁰;
 		Complex	ȓ  = 0;
 
 		STATIC const double T = 0.25; // 0.55
-		static const double fasen_A = sin(T * 2 * M_PI);
-		static const double fasen_B = sin(T * 2 * M_PI + (2 * M_PI)/3);
-		static const double fasen_C = sin(T * 2 * M_PI - (2 * M_PI)/3);
+		static const double fasen_A = sin(T * 2 * π);
+		static const double fasen_B = sin(T * 2 * π + (2 * π)/3);
+		static const double fasen_C = sin(T * 2 * π - (2 * π)/3);
 
 		double EMF0 = 0;
 		for( ui i = 0; i < slots; i++ )
@@ -627,13 +628,13 @@ static	double	calcWF	( ui slots, ui poles, ui layers	)
 struct Print_sxema		final: Print_config
 {
 CE	Print_sxema	( void			): Print_config( 0, "winding scheme", "winding scheme") {}
-STATIC	bool	test0	( ui slots, ui poles	)	{ return (poles / НОД( slots/3, poles)) % 3;		}
+STATIC	bool	test0	( ui slots, ui poles	)	{ return (poles / НОД( slots/m, poles)) % m;		}
 STATIC	bool	test1	( ui slots, ui poles	)
 	{
 		if( slots == poles )
 			return false;
 
-		assert( slots % 3 == 0 && slots >= 3 );	// Количество пазов не делится на 3!
+		assert( slots % m == 0 && slots >= m );	// Количество пазов не делится на число фаз!
 		assert( poles % 2 == 0 && poles >= 2 );	// Не четное количество полюсов!
 
 		angle α = 30⁰ + ε⁰;
@@ -661,8 +662,8 @@ virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
 		if( ! test0( slots, poles) )	return Val();
 						return Val( slots, poles, layers);
 	}
-virtual	strf<>	usage_s	( void			) cØnst	{ return { };						}
-virtual	void	usage_l	( void			) cØnst	{							}
+//virtual	strf<>	usage_s	( void			) cØnst	{ return { };						}
+//virtual	void	usage_l	( void			) cØnst	{							}
 virtual	void	print	( Val val		) cØnst
 	{
 		ui layers = val.layers();
@@ -670,7 +671,7 @@ virtual	void	print	( Val val		) cØnst
 		ui poles = val.poles();
 
 		assert( slots != poles );		// Количество полюсов равно количеству пазов!
-		assert( slots % 3 == 0 && slots );	// Количество пазов не делится на 3!
+		assert( slots % m == 0 && slots );	// Количество пазов не делится на число фаз!
 		assert( poles % 2 == 0 && poles );	// Нечетное количество полюсов!
 
 		if( layers == 1)
@@ -848,7 +849,7 @@ int find_n_print_schemes( void )
 	Val val	[size(OPTIONS)];
 
 	ui found = 0;
-	for( ui slots = slots_min; slots <= slots_max; slots += 3)
+	for( ui slots = slots_min; slots <= slots_max; slots += m)
 	{
 		for( ui poles = poles_min; poles <= poles_max; poles += 2)
 		{
@@ -914,7 +915,7 @@ int find_n_print_schemes( void )
 	print_hr( hr_len );
 
 	found = 0;
-	for( ui slots = slots_min; slots <= slots_max; slots += 3)
+	for( ui slots = slots_min; slots <= slots_max; slots += m)
 	{
 		for( ui poles = poles_min; poles <= poles_max; poles += 2)
 		{
@@ -958,14 +959,19 @@ int usage( void)
 	int n = 79 - printf( "        " APPNAME " [-h]");
 	for( ui i = 0; i < size(OPTIONS)-1; i++)
 	{
+		if( ! OPTIONS[i]->chr )
+			continue;
 		if( (n -= printf(" [%s]", &*(OPTIONS[i]->usage_s())) ) < 0 )
 			n = 79 - printf("\n       ");
 	}
-	printf(	"\n\n%s:\n", _("OPTIONS")								);
+	printf(	"\n%s:\n", _("OPTIONS")									);
 	printf(	"\t-h\t\t%s\n", _("display this help and exit")						);
 	for( ui i = 0; i < size(OPTIONS); i++)
+	{
+		if( ! OPTIONS[i]->chr )
+			continue;
 		OPTIONS[i]->usage_l();
-
+	}
 	printf( "\n%s:\n\t<%s>  \t", _("ARGS"), _("range")						);
 	marginprint( 0, 24, 79-24, _(
 		"is the pair of numbers separated by a '-' sign. In this pair, the first or second "

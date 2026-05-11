@@ -92,11 +92,24 @@ CE ui pow10( ui n)
 // наибольший общий делить (НОД) a.k.a. greatest common divisor
 CE ui НОД( ui a, ui b)
 {
-	if( a < b )
-		swap(a, b);
-	while( a %= b )
-		swap(a, b);
-	return b;
+	int shift;
+	if( !a ) return b;
+	if( !b ) return a;
+	for( shift = 0; ((a | b) & 1) == 0; shift++)
+	{
+		a >>= 1;
+		b >>= 1;
+	}
+	while( (a & 1) == 0)
+		a >>= 1;
+	do {
+		while( (b & 1) == 0)
+			b >>= 1;
+		if( a > b)
+			swap(a, b);
+		b = b - a;
+	} while( b != 0);
+	return a << shift;
 }
 // Наименьшее общее кратное a.k.a. least common multiple
 CE ui НОК( ui a, ui b)
@@ -339,7 +352,9 @@ CE	Opt_balans	( void			): Opt( 'b', "balanc", "stator balance"), var(any) {}
 enum	Variant						{ any = 0, yes = 1, no = 2				};
 	Variant	var;
 virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c[+|-|any]", chr };			}
-virtual	Val	test	( ui slots, ui, ui	) cØnst { ui r = slots%2+1; return{ !var || var == r ? r : 0 };	}
+virtual	Val	test	( ui slots,ui, ui layers) cØnst { ui r = (slots / (layers==1 ? 2 : 1)) % 2 + 1
+							; return{ !var || var == r ? r : 0 };
+							}
 virtual	void	print	( Val val		) cØnst
 	{
 		static Color cl[] = { green,	red	};
@@ -477,6 +492,18 @@ virtual	Val	test	( ui slots, ui poles, ui) cØnst	{ return in_range( НОК( slo
 } opt_cogging;
 
 //--------------------------------------------------------------------------------------------------------------
+struct Opt_symmetries	final: Opt_range
+{
+CE	Opt_symmetries	( void				)
+	: Opt_range( 'g', "groups", "number of symmetrical groups of windings", 0u, UINT_MAX) {}
+virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
+	{ return in_range( НОД	( slots / (layers==1 ? 2 : 1)
+				, poles / 2
+				)
+	); }
+} opt_symmetries;
+
+//--------------------------------------------------------------------------------------------------------------
 struct Opt_reduction		final: Opt_range
 {
 CE	Opt_reduction	( void			): Opt_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0u, UINT_MAX) {}
@@ -592,7 +619,7 @@ static	double	calcWF	( ui slots, ui poles, ui layers	)
 struct Print_sxema		final: Print_only
 {
 CE	Print_sxema	( void			): Print_only( "winding scheme", "winding scheme") {}
-STATIC	bool	test0	( ui slots, ui poles	)	{ return (poles / НОД( slots/m, poles)) % m;		}
+STATIC	bool	test0	( ui slots, ui poles	)	{ return poles % НОД( slots, m*poles);			}
 STATIC	bool	test1	( ui slots, ui poles	)
 	{
 		if( slots == poles )
@@ -749,6 +776,7 @@ Opt *OPTIONS[] = // массив всех опций
 , &opt_poles
 , &opt_layers
 , &opt_balans
+, &opt_symmetries
 , &opt_cogging
 , &opt_q
 , &print_q_fraction

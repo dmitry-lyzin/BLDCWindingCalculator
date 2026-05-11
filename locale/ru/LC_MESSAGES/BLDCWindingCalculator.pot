@@ -47,11 +47,17 @@ msgstr ""
 "сбалансированных статоров с числом пазов от 3 до 45 и коэффициентом намотки "
 "более 0.6"
 
+msgid "GCD"
+msgstr "НОД"
+
 msgid "Incorrect option"
 msgstr "Неправильная опция"
 
 msgid "It's not a number. Used by default"
 msgstr "Это не число. Подставим"
+
+msgid "LCM"
+msgstr "НОК"
 
 msgid "Let's take the nearest suitable one"
 msgstr "Возьмём ближайшее подходящее"
@@ -113,6 +119,9 @@ msgstr "выдать эту подсказку и сдохнуть"
 msgid "fraction"
 msgstr "дробью"
 
+msgid "groups"
+msgstr "групп"
+
 msgid ""
 "is the pair of numbers separated by a '-' sign. In this pair, the first or "
 "second or even both numbers can be omitted (one '-' remains) or one number "
@@ -133,6 +142,9 @@ msgstr "магнитных полюсов ротора"
 
 msgid "not"
 msgstr "не"
+
+msgid "number of symmetrical groups of windings"
+msgstr "количество симметричных групп обмоток"
 
 msgid "poles"
 msgstr "полюсов"

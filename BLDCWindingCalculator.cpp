@@ -572,9 +572,20 @@ struct Opt_winding_factor	final: Opt_range_01
 {
 CE	Opt_winding_factor( void		): Opt_range_01( 'w', "WF", "winding factor") {}
 
-virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst	{return in_range( calcWF(slots, poles, layers));}
-static	double	calcWF	( ui slots, ui poles, ui layers	)
+virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst	
 	{
+		if( layers == 1 && slots % 2 )
+			return Val();
+		if( !(poles % НОД( slots, m*poles)) ) // (c) Дмитрий Лызин
+			return Val();
+		return in_range( calcWF( slots, poles, layers));
+	}
+static	double	calcWF	( ui slots, ui poles, ui layers )
+	{
+		assert( slots != poles );		// Количество полюсов равно количеству пазов!
+		assert( slots % m == 0 && slots );	// Количество пазов не делится на число фаз!
+		assert( poles % 2 == 0 && poles );	// Нечетное количество полюсов!
+
 		ui isSPS = 0;
 		if(layers == 1)
 			isSPS = 1;
@@ -585,25 +596,26 @@ static	double	calcWF	( ui slots, ui poles, ui layers	)
 		angle	α  = 30⁰ + ε⁰;
 		Complex	ȓ  = 0;
 
-		STATIC const double T = 0.25; // 0.55
-		static const double fasen_A = sin(T * 2 * π);
-		static const double fasen_B = sin(T * 2 * π + (2 * π)/3);
-		static const double fasen_C = sin(T * 2 * π - (2 * π)/3);
+		CE int fasen_A =  2; // = 2 * cos(	0	);
+		CE int fasen_B = -1; // = 2 * cos(  (2 * π)/3	);
+		CE int fasen_C = -1; // = 2 * cos( -(2 * π)/3	);
 
-		double EMF0 = 0;
+		IN_DEBUG( ui a = 0, b = 0, c = 0, A = 0, B = 0, C = 0; )
+
+		int EMF0 = 0;
 		for( ui i = 0; i < slots; i++ )
 		{
-			double EMF = 0;
+			int EMF = 0;
 			if( !(i & isSPS) )
 			{
-					if( α <  60⁰ )	EMF =  fasen_A;
-				else	if( α < 120⁰ )	EMF = -fasen_B;
-				else	if( α < 180⁰ )	EMF =  fasen_C;
-				else	if( α < 240⁰ )	EMF = -fasen_A;
-				else	if( α < 300⁰ )	EMF =  fasen_B;
-				else			EMF = -fasen_C;
+				     if( α <  60⁰ ) { EMF =  fasen_A; IN_DEBUG( A++; ) }
+				else if( α < 120⁰ ) { EMF = -fasen_B; IN_DEBUG( b++; ) }
+				else if( α < 180⁰ ) { EMF =  fasen_C; IN_DEBUG( C++; ) }
+				else if( α < 240⁰ ) { EMF = -fasen_A; IN_DEBUG( a++; ) }
+				else if( α < 300⁰ ) { EMF =  fasen_B; IN_DEBUG( B++; ) }
+				else                { EMF = -fasen_C; IN_DEBUG( c++; ) }
 			}
-			ȓ += â * (EMF - EMF0);
+			ȓ += â * double(EMF - EMF0);
 			EMF0 = EMF;
 
 			â *= Δâ;
@@ -611,80 +623,40 @@ static	double	calcWF	( ui slots, ui poles, ui layers	)
 		}
 		ȓ -= EMF0;
 
-		return 2 * abs(ȓ) / (slots * layers);
+		assert( a == b && a == c && A == B && A == C);
+
+		return abs(ȓ) / (slots * layers);
 	}
 } opt_winding_factor;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Print_sxema		final: Print_only
 {
-CE	Print_sxema	( void			): Print_only( "winding scheme", "winding scheme") {}
-STATIC	bool	test0	( ui slots, ui poles	)	{ return poles % НОД( slots, m*poles);			}
-STATIC	bool	test1	( ui slots, ui poles	)
-	{
-		if( slots == poles )
-			return false;
-
-		assert( slots % m == 0 && slots >= m );	// Количество пазов не делится на число фаз!
-		assert( poles % 2 == 0 && poles >= 2 );	// Не четное количество полюсов!
-
-		angle α = 30⁰ + ε⁰;
-		angle ρ = div_mul( 180⁰, slots, poles);
-		ui a = 0, b = 0, c = 0, A = 0, B = 0, C = 0;
-
-		for( ui i = 0; i < slots; i++ )
-		{
-			     if( α <  60⁰ ) A++;
-			else if( α < 120⁰ ) b++;
-			else if( α < 180⁰ ) C++;
-			else if( α < 240⁰ ) a++;
-			else if( α < 300⁰ ) B++;
-			else                c++;
-
-			α += ρ;
-		}
-
-		return (a == b && a == c && A == B && A == C);
-	}
-STATIC	bool	test2	( ui slots, ui poles	)	{ return test0(slots, poles) == test1(slots, poles);	}
-virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
-	{
-		if( layers == 1 && slots % 2 )	return Val();
-		if( ! test0( slots, poles) )	return Val();
-						return Val( slots, poles, layers);
-	}
-virtual	void	print	( Val val		) cØnst
+CE	Print_sxema	( void				): Print_only( "winding scheme", "winding scheme") {}
+virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst	{ return Val( slots, poles, layers); }
+virtual	void	print	( Val val			) cØnst
 	{
 		ui layers = val.layers();
 		ui slots = val.slots();
 		ui poles = val.poles();
 
-		assert( slots != poles );		// Количество полюсов равно количеству пазов!
-		assert( slots % m == 0 && slots );	// Количество пазов не делится на число фаз!
-		assert( poles % 2 == 0 && poles );	// Нечетное количество полюсов!
-
 		if( layers == 1)
 			slots /= 2;
 
-		angle Δα = div_mul( 180⁰, slots, poles);
-
-		char *sxema = SXEMABUF;
 		angle α = 30⁰ + ε⁰;
-		IN_DEBUG( ui a = 0, b = 0, c = 0, A = 0, B = 0, C = 0; )
-
+		angle Δα = div_mul( 180⁰, slots, poles);
+		char *sxema = SXEMABUF;
 		for( ui i = 0; i < slots; i++ )
 		{
-			     if( α <  60⁰ ) { *sxema++ = 'A'; IN_DEBUG( A++; ) }
-			else if( α < 120⁰ ) { *sxema++ = 'b'; IN_DEBUG( b++; ) }
-			else if( α < 180⁰ ) { *sxema++ = 'C'; IN_DEBUG( C++; ) }
-			else if( α < 240⁰ ) { *sxema++ = 'a'; IN_DEBUG( a++; ) }
-			else if( α < 300⁰ ) { *sxema++ = 'B'; IN_DEBUG( B++; ) }
-			else                { *sxema++ = 'c'; IN_DEBUG( c++; ) }
+			     if( α <  60⁰ ) *sxema++ = 'A';
+			else if( α < 120⁰ ) *sxema++ = 'b';
+			else if( α < 180⁰ ) *sxema++ = 'C';
+			else if( α < 240⁰ ) *sxema++ = 'a';
+			else if( α < 300⁰ ) *sxema++ = 'B';
+			else                *sxema++ = 'c';
 
 			α += Δα;
 		}
-
-		assert( a == b && a == c && A == B && A == C);
 
 		//printf("\t\t%.*s\n", slots, BUF);
 		memcpy( sxema, SXEMABUF, slots);
@@ -742,33 +714,6 @@ virtual	void	print	( Val val		) cØnst
 		}
 	}
 } print_sxema;
-#if DIV( тесты алгоритма поиска схемы намотки )
-STATIC_ASSERT( Print_sxema::test2( 156,	58)  );
-STATIC_ASSERT( Print_sxema::test2( 156,	370) );
-STATIC_ASSERT( Print_sxema::test2( 168,	62)  );
-STATIC_ASSERT( Print_sxema::test2( 300,	110) );
-STATIC_ASSERT( Print_sxema::test2( 300,	410) );
-STATIC_ASSERT( Print_sxema::test2( 312,	116) );
-STATIC_ASSERT( Print_sxema::test2( 312,	466) );
-STATIC_ASSERT( Print_sxema::test2( 324,	174) );
-STATIC_ASSERT( Print_sxema::test2( 360,	132) );
-STATIC_ASSERT( Print_sxema::test2( 360,	494) );
-STATIC_ASSERT( Print_sxema::test2( 372,	230) );
-STATIC_ASSERT( Print_sxema::test2( 372,	418) );
-STATIC_ASSERT( Print_sxema::test2( 396,	146) );
-STATIC_ASSERT( Print_sxema::test2( 396,	494) );
-STATIC_ASSERT( Print_sxema::test2( 408,	140) );
-STATIC_ASSERT( Print_sxema::test2( 408,	500) );
-STATIC_ASSERT( Print_sxema::test2( 420,	154) );
-STATIC_ASSERT( Print_sxema::test2( 24, 18) );
-STATIC_ASSERT( Print_sxema::test2( 24, 20) );
-STATIC_ASSERT( Print_sxema::test2( 24, 22) );
-STATIC_ASSERT( Print_sxema::test2( 24, 26) );
-STATIC_ASSERT( Print_sxema::test2( 24, 28) );
-STATIC_ASSERT( Print_sxema::test2( 24, 30) );
-STATIC_ASSERT( Print_sxema::test2( 24, 32) );
-STATIC_ASSERT( Print_sxema::test2( 60, 22) );
-#endif
 
 //--------------------------------------------------------------------------------------------------------------
 Opt *OPTIONS[] = // массив всех опций
@@ -1029,6 +974,25 @@ int main( int argc, char *const *argv )
 	assert( abs( Opt_winding_factor::calcWF( 36, 22, 1) - 0.786218) < 0.000001 );
 	assert( abs( Opt_winding_factor::calcWF( 12, 10, 2) - 0.933013) < 0.000001 );
 	assert( abs( Opt_winding_factor::calcWF( 12, 10, 1) - 0.965926) < 0.000001 );
+
+	assert( Opt_winding_factor::calcWF( 408, 140, 2) );
+	assert( Opt_winding_factor::calcWF( 156, 58, 2) );
+	assert( Opt_winding_factor::calcWF( 156, 370, 2) );
+	assert( Opt_winding_factor::calcWF( 168, 62, 2) );
+	assert( Opt_winding_factor::calcWF( 300, 110, 2) );
+	assert( Opt_winding_factor::calcWF( 300, 410, 2) );
+	assert( Opt_winding_factor::calcWF( 312, 116, 2) );
+	assert( Opt_winding_factor::calcWF( 312, 466, 2) );
+	assert( Opt_winding_factor::calcWF( 324, 174, 2) );
+	assert( Opt_winding_factor::calcWF( 360, 132, 2) );
+	assert( Opt_winding_factor::calcWF( 360, 494, 2) );
+	assert( Opt_winding_factor::calcWF( 372, 230, 2) );
+	assert( Opt_winding_factor::calcWF( 372, 418, 2) );
+	assert( Opt_winding_factor::calcWF( 396, 146, 2) );
+	assert( Opt_winding_factor::calcWF( 396, 494, 2) );
+	assert( Opt_winding_factor::calcWF( 408, 140, 2) );
+	assert( Opt_winding_factor::calcWF( 408, 500, 2) );
+	assert( Opt_winding_factor::calcWF( 420, 154, 2) );
 #endif
 
 	STDOUT_IS_A_TTY = isatty( STDOUT_FILENO);

@@ -435,7 +435,7 @@ virtual	bool	load	( cchar *arg	)
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_layers		final: Opt_range
 {
-CE	Opt_layers	( void			): Opt_range( 'l', "layer", "layer winding", 2, 2) {}
+CE	Opt_layers	( void			): Opt_range( 'l', "layer", "layer winding", 1, 2) {}
 virtual	Val	test	( ui, ui, ui layers	) cØnst	{ return layers; }
 virtual	void	print	( Val val		) cØnst	{ static cchar* c[] = {"1(LRK)", "2(PLRK)"} //{"single", "double"}
 							; printf( "%s", c[ui(val)-1]);
@@ -492,7 +492,7 @@ virtual	Val	test	( ui slots, ui poles, ui) cØnst	{ return in_range( НОК( slo
 } opt_cogging;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Opt_symmetries	final: Opt_range
+struct Opt_symmetries		final: Opt_range
 {
 CE	Opt_symmetries	( void				)
 	: Opt_range( 'g', "groups", "number of symmetrical groups of windings", 0u, UINT_MAX) {}
@@ -572,7 +572,7 @@ struct Opt_winding_factor	final: Opt_range_01
 {
 CE	Opt_winding_factor( void		): Opt_range_01( 'w', "WF", "winding factor") {}
 
-virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst	
+virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
 	{
 		if( layers == 1 && slots % 2 )
 			return Val();
@@ -1080,5 +1080,5 @@ int main( int argc, char *const *argv )
 		*/
 	}
 
-	return ! find_n_print_schemes();
+	return find_n_print_schemes();
 }

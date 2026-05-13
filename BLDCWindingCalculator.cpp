@@ -239,7 +239,7 @@ STATIC_ASSERT( N("4321"	) == 4321	);
 	return str_to_num( str, x1);
 }
 
-enum Color { red, green, blue };
+enum Color { red, cyan, green };
 
 void color_print( Color color, cchar *str )
 {
@@ -253,8 +253,8 @@ void color_print( Color color, cchar *str )
 	// ANSI escape color codes
 	static cchar *color_codes[3] =
 	{ "91" // Bright Red // "93" // Bright Yellow
+	, "96" // Bright Cyan // "94" // Bright Blue
 	, "92" // Bright Green
-	, "94" // Bright Blue // "96" // Bright Cyan
 	};
 
 	assert( ui(color) < size(color_codes) );
@@ -262,8 +262,8 @@ void color_print( Color color, cchar *str )
 #else
 	static WORD attributes[3] =
 	{ FOREGROUND_INTENSITY	| FOREGROUND_RED
+	, FOREGROUND_INTENSITY	| FOREGROUND_BLUE | FOREGROUND_GREEN
 	, FOREGROUND_INTENSITY	| FOREGROUND_GREEN
-	, FOREGROUND_INTENSITY	| FOREGROUND_BLUE
 	};
 
 	assert( ui(color) < size(attributes) );
@@ -348,21 +348,25 @@ virtual	bool	load	( cchar *arg			)	= 0;
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_balans: Opt
 {
-CE	Opt_balans	( void			): Opt( 'b', "balanc", "stator balance"), var(any) {}
-enum	Variant						{ any = 0, yes = 1, no = 2				};
+CE	Opt_balans	( void				): Opt( 'b', "balanc", "stator balance"), var(any) {}
+enum	Variant							{ any = 0, yes = 1, no = 2			};
 	Variant	var;
-virtual	strf<>	usage_s	( void			) cØnst	{ return { "%c[+|-|any]", chr };			}
-virtual	Val	test	( ui slots,ui, ui layers) cØnst { ui r = (slots / (layers==1 ? 2 : 1)) % 2 + 1
-							; return{ !var || var == r ? r : 0 };
-							}
-virtual	void	print	( Val val		) cØnst
+virtual	strf<>	usage_s	( void				) cØnst	{ return { "%c[+|-|any]", chr };		}
+virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
+	{
+		if( layers == 1)
+			slots /= 2;
+		ui r = !((slots & 1) == 0 || НОД( slots, poles/2 ) > 1) + 1;
+		return{ !var || var == r ? r : 0 };
+	}
+virtual	void	print	( Val val			) cØnst
 	{
 		static Color cl[] = { green,	red	};
 		static cchar *c[] = { "√",	"×"	};
 		color_print( cl[ui(val)-1], c[ui(val)-1] );
 		color_print_reset();
 	}
-virtual	bool	load	( cchar *arg		) Ø
+virtual	bool	load	( cchar *arg			) Ø
 	{
 		switch( arg[0])
 		{

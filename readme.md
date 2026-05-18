@@ -6,7 +6,7 @@
 # BLDC Winding Calculator
 
 This command-line utility is designed to find the winding layout, winding factor,
-number of number of winding symmetries, number of winding layers, etc.
+number of number of winding symmetries, cogging steps per turn, number of winding layers, etc.
 for your electric motor with the concentrated winding (so far).
 The search parameters can be set as ranges.
 Unlike the well-known *Bavaria* (peace be upon her) and the like,

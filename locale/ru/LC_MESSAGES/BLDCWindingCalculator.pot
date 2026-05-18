@@ -107,6 +107,9 @@ msgstr "залипов"
 msgid "cogging steps"
 msgstr "магнитных залипаний"
 
+msgid "cogging steps per turn"
+msgstr "залипаний на оборот"
+
 msgid "config"
 msgstr "конфиг"
 

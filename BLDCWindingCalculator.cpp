@@ -502,7 +502,8 @@ virtual	bool	load	( cchar *arg		) Ø
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_cogging		final: Opt_range
 {
-CE	Opt_cogging	( void			): Opt_range( 'c', T("cogging"), T("cogging steps"), 0u, UINT_MAX) {}
+CE	Opt_cogging	( void			)
+	: Opt_range( 'c', T("cogging"), T("cogging steps per turn"), 0u, UINT_MAX) {}
 virtual	Val	test	( ui slots, ui poles, ui) cØnst	{ return in_range( НОК( slots, poles) );	}
 } opt_cogging;
 

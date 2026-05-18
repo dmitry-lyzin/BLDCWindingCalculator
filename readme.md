@@ -5,11 +5,14 @@
 ![logo](img/logo.png)
 # BLDC Winding Calculator
 
-This command-line utility is designed to find the design of BLDC motor windings.
+This command-line utility is designed to find the winding layout, winding factor,
+number of number of winding symmetries, number of winding layers, etc.
+for your electric motor with the concentrated winding (so far).
 The search parameters can be set as ranges.
-Unlike the well-known *Bavaria* and its ilk, which simply find one winding circuit
-and that's it, this program is able to sort through the options and
-produce a *list* of circuits that match the specified parameters.
+Unlike the well-known *Bavaria* (peace be upon her) and the like,
+which simply find one winding scheme and that's it,
+this program is able to sort through the options and output a *list* of schemes
+corresponding to the specified parameters.
 
 ## ⌨️ Usage example
 

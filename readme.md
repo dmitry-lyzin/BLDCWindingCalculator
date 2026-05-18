@@ -55,7 +55,7 @@ BLDCWindingCalculator p50 s-50 b+ g2- w0.9-
 
 ## 🛠️ Installing and running
 
-- 🗑️ Windows
+- ♻️ Windows
 
 [Releases](https://github.com/dmitry-lyzin/BLDCWindingCalculator/releases/latest)
 contain precompiled exe binarie for Windows 32 architecture.

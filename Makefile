@@ -24,6 +24,8 @@ uninstall:
 locale/ru/LC_MESSAGES/$(APPNAME).pot: $(APPNAME).cpp
 	xgettext --keyword=_ --from-code=UTF-8 --package-name $(APPNAME) --package-version $(VERSION) \
 		 --default-domain $(APPNAME) --omit-header --no-location --sort-output --join-existing --output $@ $<
+	xgettext --keyword=T --from-code=UTF-8 --package-name $(APPNAME) --package-version $(VERSION) \
+		 --default-domain $(APPNAME) --omit-header --no-location --sort-output --join-existing --output $@ $<
 	xgettext             --from-code=UTF-8 --package-name $(APPNAME) --package-version $(VERSION) \
 		 --default-domain $(APPNAME) --omit-header --no-location --sort-output --join-existing --output $@ $<
 %.po: %.pot

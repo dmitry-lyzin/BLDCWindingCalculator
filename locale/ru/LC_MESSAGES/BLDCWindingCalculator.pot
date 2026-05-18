@@ -119,6 +119,12 @@ msgstr "выдать эту подсказку и сдохнуть"
 msgid "fraction"
 msgstr "дробью"
 
+msgid "gcd"
+msgstr "НОД"
+
+msgid "greatest common divider between slots and pole pairs"
+msgstr "наибольший общий делитель пазов и пар полюсов"
+
 msgid "groups"
 msgstr "групп"
 
@@ -135,13 +141,17 @@ msgid "layer"
 msgstr "слоёв"
 
 msgid "layer winding"
-msgstr "слойные обмотки"
+msgstr "слоёв в обмотке"
 
 msgid "magnet poles"
 msgstr "магнитных полюсов ротора"
 
 msgid "not"
 msgstr "не"
+
+msgid ""
+"number of repetitive part of the winding layout = GCD(slots, pole_pairs)"
+msgstr "число повторов в схеме намотки = НОД(пазов, пар_полюсов)"
 
 msgid "number of symmetrical groups of windings"
 msgstr "количество симметричных групп обмоток"
@@ -151,6 +161,15 @@ msgstr "полюсов"
 
 msgid "q"
 msgstr "q"
+
+msgid "q rational fraction"
+msgstr "q рациональной дробью"
+
+msgid "q(dec)"
+msgstr "q(дес)"
+
+msgid "q(rat)"
+msgstr "q(рац)"
 
 msgid "range"
 msgstr "диапазон"

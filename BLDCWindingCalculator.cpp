@@ -80,6 +80,9 @@ inline cchar *_( cchar *msgid)
 	return gettext( msgid);
 }
 
+// переведи это
+#define T(msgid) msgid
+
 CE inline int fast_toupper( int c) { return c & ~('a' ^ 'A'); }
 // pow10(n) = 10ⁿ
 CE ui pow10( ui n)
@@ -89,21 +92,24 @@ CE ui pow10( ui n)
 		res *= 10;
 	return res;
 }
+// четный
+CE inline bool even( ui x ) { return (x & 1) == 0; }
+//auto eertet = even(1);
 // наибольший общий делить (НОД) a.k.a. greatest common divisor
 CE ui НОД( ui a, ui b)
 {
 	int shift;
 	if( !a ) return b;
 	if( !b ) return a;
-	for( shift = 0; ((a | b) & 1) == 0; shift++)
+	for( shift = 0; even(a | b); shift++)
 	{
 		a >>= 1;
 		b >>= 1;
 	}
-	while( (a & 1) == 0)
+	while( even(a))
 		a >>= 1;
 	do {
-		while( (b & 1) == 0)
+		while( even(b))
 			b >>= 1;
 		if( a > b)
 			swap(a, b);
@@ -291,10 +297,13 @@ void color_print_reset()
 union Val
 {
 CE	Val		(				): u( 0					){}
-CE OP	bool		(				) const	{ return u;			}
+CE	bool	OP !	(				) const	{ return !u;			}
 CE	bool	OP ==	( const Val &x			) const	{ return u == x.u;		}
 CE	bool	OP !=	( const Val &x			) const	{ return u != x.u;		}
 CE	bool	OP <	( const Val &x			) const	{ return u <  x.u;		}
+
+CE	Val		( bool x			): u( x + 1				){}
+CE OP	bool		(				) const	{ return u - 1;			}
 
 CE	Val		( ui x				): u( x					){}
 CE	Val		( int x				): u( x					){}
@@ -348,22 +357,23 @@ virtual	bool	load	( cchar *arg			)	= 0;
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_balans: Opt
 {
-CE	Opt_balans	( void				): Opt( 'b', "balanc", "stator balance"), var(any) {}
-enum	Variant							{ any = 0, yes = 1, no = 2			};
-	Variant	var;
+CE	Opt_balans	( void				): Opt( 'b', T("balanc"), T("stator balance")), sample() {}
+	Val	sample;
 virtual	strf<>	usage_s	( void				) cØnst	{ return { "%c[+|-|any]", chr };		}
 virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
 	{
 		if( layers == 1)
 			slots /= 2;
-		ui r = !((slots & 1) == 0 || НОД( slots, poles/2 ) > 1) + 1;
-		return{ !var || var == r ? r : 0 };
+		Val r = ( even(slots) || НОД( slots, poles/2 ) > 1);
+		if( !sample )
+			return r;
+		return sample == r ? r : Val();
 	}
 virtual	void	print	( Val val			) cØnst
 	{
-		static Color cl[] = { green,	red	};
-		static cchar *c[] = { "√",	"×"	};
-		color_print( cl[ui(val)-1], c[ui(val)-1] );
+		static Color cl[] = { red,	green	};
+		static cchar *c[] = { "×",	"√"	};
+		color_print( cl[bool(val)], c[bool(val)] );
 		color_print_reset();
 	}
 virtual	bool	load	( cchar *arg			) Ø
@@ -373,13 +383,14 @@ virtual	bool	load	( cchar *arg			) Ø
 		case  0 :
 		case '+':
 		case ' ':
-		case 'y': var = yes;	return true;
-
+		case 'y':
+			sample = true;	return true;
 		case '-':
-		case 'n': var = no;	return true;
-
+		case 'n':
+			sample = false;	return true;
 		case 'a':
-		case 'x': var = any;	return true;
+		case 'x':
+			sample = Val();	return true;
 		default:		return false;
 		}
 		assert( false);
@@ -439,7 +450,7 @@ virtual	bool	load	( cchar *arg	)
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_layers		final: Opt_range
 {
-CE	Opt_layers	( void			): Opt_range( 'l', "layer", "layer winding", 1, 2) {}
+CE	Opt_layers	( void			): Opt_range( 'l', T("layer"), T("layer winding"), 1, 2) {}
 virtual	Val	test	( ui, ui, ui layers	) cØnst	{ return layers; }
 virtual	void	print	( Val val		) cØnst	{ static cchar* c[] = {"1(LRK)", "2(PLRK)"} //{"single", "double"}
 							; printf( "%s", c[ui(val)-1]);
@@ -464,14 +475,14 @@ virtual	bool	load	( cchar *arg		) Ø
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_poles		final: Opt_range_step
 {
-CE	Opt_poles	( void			): Opt_range_step( 'p', "poles", "magnet poles", 2, 100, 2) {}
+CE	Opt_poles	( void			): Opt_range_step( 'p', T("poles"), T("magnet poles"), 2, 100, 2) {}
 virtual	Val	test	( ui, ui poles, ui	) cØnst	{ return poles; }
 } opt_poles;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_slots		final: Opt_range_step
 {
-CE	Opt_slots	( void			): Opt_range_step( 's', "slots", "slots in the stator", m, 99, m) {}
+CE	Opt_slots	( void			): Opt_range_step( 's', T("slots"), T("slots in the stator"), m, 99, m) {}
 virtual	Val	test	( ui slots, ui, ui	) cØnst	{ return slots; }
 virtual	bool	load	( cchar *arg		) Ø
 	{
@@ -491,26 +502,29 @@ virtual	bool	load	( cchar *arg		) Ø
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_cogging		final: Opt_range
 {
-CE	Opt_cogging	( void			): Opt_range( 'c', "cogging", "cogging steps", 0u, UINT_MAX) {}
+CE	Opt_cogging	( void			): Opt_range( 'c', T("cogging"), T("cogging steps"), 0u, UINT_MAX) {}
 virtual	Val	test	( ui slots, ui poles, ui) cØnst	{ return in_range( НОК( slots, poles) );	}
 } opt_cogging;
 
 //--------------------------------------------------------------------------------------------------------------
-struct Opt_symmetries		final: Opt_range
+struct Opt_GCD			final: Opt_range
 {
-CE	Opt_symmetries	( void				)
-	: Opt_range( 'g', "groups", "number of symmetrical groups of windings", 0u, UINT_MAX) {}
+CE	Opt_GCD		( void				)
+	: Opt_range	( 'g', T("GCD")
+			, T("number of repetitive part of the winding layout = GCD(slots, pole_pairs)")
+			, 0u, UINT_MAX
+			) {}
 virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
 	{ return in_range( НОД	( slots / (layers==1 ? 2 : 1)
 				, poles / 2
 				)
 	); }
-} opt_symmetries;
+} opt_GCD;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_reduction		final: Opt_range
 {
-CE	Opt_reduction	( void			): Opt_range( 'r', "ƒ/ν", "reduction (ƒ/ν)", 0u, UINT_MAX) {}
+CE	Opt_reduction	( void			): Opt_range( 'r', T("ƒ/ν"), T("reduction (ƒ/ν)"), 0u, UINT_MAX) {}
 virtual	Val	test	( ui slots, ui poles, ui) cØnst	{ return in_range( НОК( slots, poles)/6 );	}
 } opt_reduct;
 
@@ -556,14 +570,14 @@ virtual	bool	load	( cchar *arg		) Ø
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_q			final: Opt_range_01
 {
-	CE	Opt_q	( void			): Opt_range_01( 'q', "q", "slots/poles/phases (q)") {}
+	CE	Opt_q	( void			): Opt_range_01( 'q', T("q(dec)"), T("slots/poles/phases (q)")) {}
 virtual	Val	test	( ui slots, ui poles, ui) cØnst	{ return in_range( double(slots/m)/poles );	}
 } opt_q;
 
 //--------------------------------------------------------------------------------------------------------------
 struct Print_q_fraction		final: Print_only
 {
-CE	Print_q_fraction( void			): Print_only( "q", "fraction") {}
+CE	Print_q_fraction( void			): Print_only( T("q(rat)"), T("q rational fraction")) {}
 virtual	Val	test	( ui slots, ui poles, ui) cØnst	{ slots /= m
 							; ui nod = НОД( slots, poles)
 							; return { slots/nod, poles/nod, 0 };
@@ -574,11 +588,11 @@ virtual	void	print	( Val val		) cØnst	{ printf( "%u/%u", val.slots(), val.poles
 //--------------------------------------------------------------------------------------------------------------
 struct Opt_winding_factor	final: Opt_range_01
 {
-CE	Opt_winding_factor( void		): Opt_range_01( 'w', "WF", "winding factor") {}
+CE	Opt_winding_factor( void		): Opt_range_01( 'w', T("WF"), T("winding factor")) {}
 
 virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
 	{
-		if( layers == 1 && slots % 2 )
+		if( layers == 1 && !even(slots) )
 			return Val();
 		if( !(poles % НОД( slots, m*poles)) ) // (c) Дмитрий Лызин
 			return Val();
@@ -587,8 +601,8 @@ virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst
 static	double	calcWF	( ui slots, ui poles, ui layers )
 	{
 		assert( slots != poles );		// Количество полюсов равно количеству пазов!
-		assert( slots % m == 0 && slots );	// Количество пазов не делится на число фаз!
-		assert( poles % 2 == 0 && poles );	// Нечетное количество полюсов!
+		assert( slots % m == 0 && slots	);	// Количество пазов не делится на число фаз!
+		assert( even(poles) && poles	);	// Нечетное количество полюсов!
 
 		ui isSPS = 0;
 		if(layers == 1)
@@ -636,7 +650,7 @@ static	double	calcWF	( ui slots, ui poles, ui layers )
 //--------------------------------------------------------------------------------------------------------------
 struct Print_sxema		final: Print_only
 {
-CE	Print_sxema	( void				): Print_only( "winding scheme", "winding scheme") {}
+CE	Print_sxema	( void				): Print_only( T("winding scheme"), T("winding scheme")) {}
 virtual	Val	test	( ui slots, ui poles, ui layers	) cØnst	{ return Val( slots, poles, layers); }
 virtual	void	print	( Val val			) cØnst
 	{
@@ -725,7 +739,7 @@ Opt *OPTIONS[] = // массив всех опций
 , &opt_poles
 , &opt_layers
 , &opt_balans
-, &opt_symmetries
+, &opt_GCD
 , &opt_cogging
 , &opt_q
 , &print_q_fraction
@@ -893,7 +907,7 @@ int find_n_print_schemes( void )
 
 int usage( void)
 {
-	printf(	APPNAME " v" VERSION "\nДмитрий Лызин <dmitry_lyzin@mail.ru>\n%s\n\n%s:\n"
+	printf(	"%s\n\n%s:\n"
 	      , _("The program to calculate the winding schemes of multi-pole electric motors (BLDC, etc.)")
 	      , _("USAGE")										);
 	int n = 79 - printf( "        " APPNAME " [-h]");
@@ -928,7 +942,7 @@ int usage( void)
 	opt_poles.min = 46;
 	opt_poles.max = opt_poles.min;
 	opt_winding_factor.min = 0.6;
-	opt_balans.var = Opt_balans::yes;
+	opt_balans.sample = true;
 
 	find_n_print_schemes();
 
@@ -1025,6 +1039,8 @@ int main( int argc, char *const *argv )
 	bindtextdomain		(APPNAME, locale);
 	bind_textdomain_codeset	(APPNAME,"UTF-8");
 	textdomain		(APPNAME	);
+
+	printf(	APPNAME " v" VERSION " Дмитрий Лызин <dmitry_lyzin@mail.ru>\n");
 
 	if( 1 == argc )
 	{

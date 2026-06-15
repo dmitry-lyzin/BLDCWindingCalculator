@@ -59,9 +59,9 @@ BLDCWindingCalculator p50 s-50 b+ g2- w0.9-
 
 [Releases](https://github.com/dmitry-lyzin/BLDCWindingCalculator/releases/latest)
 contain precompiled exe binarie for Windows 32 architecture.
-Download the `BLDCWindingCalculator-0.2.0-alpha-win32.zip` archive from there,
+Download the `BLDCWindingCalculator-0.3.0-alpha-win32.zip` archive from there,
 right-click on it, select `Extract all...`, click `Extract`,
-the folder `BLDCWindingCalculator-0.2.0-alpha-win32`
+the folder `BLDCWindingCalculator-0.3.0-alpha-win32`
 will appear next to the archive, go into it and run (double-click)
 `BLDCWindingCalculatorForNoob` (this is a cmd file, it will help you).  
 If you know what a command prompt is, just run `BLDCWindingCalculator.exe`.
